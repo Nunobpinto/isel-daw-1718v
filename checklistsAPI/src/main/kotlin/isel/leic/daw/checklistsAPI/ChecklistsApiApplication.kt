@@ -1,11 +1,11 @@
-package isel.leic.daw.g16
+package isel.leic.daw.checklistsAPI
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class G16Application
+class ChecklistsApiApplication
 
 fun main(args: Array<String>) {
-    runApplication<G16Application>(*args)
+    runApplication<ChecklistsApiApplication>(*args)
 }

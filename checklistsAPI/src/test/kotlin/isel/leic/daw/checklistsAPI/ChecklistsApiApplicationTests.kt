@@ -1,4 +1,4 @@
-package isel.leic.dae.g16
+package isel.leic.daw.checklistsAPI
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
-class G16ApplicationTests {
+class ChecklistsApiApplicationTests {
 
 	@Test
 	fun contextLoads() {
