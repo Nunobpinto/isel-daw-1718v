@@ -21,7 +21,7 @@ class ItemTemplate (
             "",
             "",
             State.Uncompleted,
-            ItemTemplateComposeKey(ChecklistTemplate("","")))
+            ItemTemplateComposeKey(ChecklistTemplate("","", "")))
 }
 
 @Embeddable
@@ -35,6 +35,6 @@ class ItemTemplateComposeKey(
         @Column(name="item_template_id")
         val itemId:Long = -1){
     private constructor():this(
-            ChecklistTemplate("","")
+            ChecklistTemplate("","", "")
     )
 }

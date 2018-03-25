@@ -24,7 +24,8 @@ class Item(
               ItemComposeKey(
                       Checklist("",
                               Date(),
-                              ChecklistTemplate("","")
+                              ChecklistTemplate("","", ""),
+                              ""
                       )
               )
       )
@@ -42,7 +43,8 @@ class ItemComposeKey(
     private constructor():this(
             Checklist("",
                       Date(),
-                    ChecklistTemplate("","")
+                    ChecklistTemplate("","", ""),
+                    ""
             )
     )
 }
