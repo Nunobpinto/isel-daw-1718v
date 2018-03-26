@@ -1,11 +1,11 @@
 package isel.leic.daw.checklistsAPI.model
 
-import java.util.*
+import java.io.Serializable
 import javax.persistence.*
 
 @Entity
 @Table(name="item")
-class Item(
+data class Item(
         @Column(name="item_name")
         val itemName : String,
 
@@ -16,35 +16,16 @@ class Item(
         val itemState: State,
 
         @EmbeddedId
-        val itemComposeKey: ItemComposeKey){
-      private constructor() :this(
-              "",
-              "",
-              State.Uncompleted,
-              ItemComposeKey(
-                      Checklist("",
-                              Date(),
-                              ChecklistTemplate("","", ""),
-                              ""
-                      )
-              )
-      )
-}
+        val itemComposeKey: ItemComposeKey
+) : Serializable
 
 @Embeddable
-class ItemComposeKey(
-        @ManyToOne
-        @JoinColumn(name="checklist_id")
-        val checklist: Checklist,
-        @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+data class ItemComposeKey(
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
         @Column(name="item_id")
-        val itemId:Long = -1){
-    private constructor():this(
-            Checklist("",
-                      Date(),
-                    ChecklistTemplate("","", ""),
-                    ""
-            )
-    )
-}
+        val itemId : Long,
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "checklist_id")
+        val checklist: Checklist
+):Serializable

@@ -1,11 +1,11 @@
 package isel.leic.daw.checklistsAPI.model
 
-import java.util.*
+import java.io.Serializable
 import javax.persistence.*
 
 @Entity
 @Table(name="item_template")
-class ItemTemplate (
+data class ItemTemplate (
     @Column(name = "item_template_name")
     val itemTemplateName : String,
 
@@ -13,28 +13,19 @@ class ItemTemplate (
     val itemTemplateDescription : String,
 
     @Column(name = "item_template_state")
-    val itemTemplateState: State = State.Uncompleted,
+    val itemTemplateState: State ,
 
     @EmbeddedId
-    val itemTemplateComposeKey: ItemTemplateComposeKey){
-    private constructor():this(
-            "",
-            "",
-            State.Uncompleted,
-            ItemTemplateComposeKey(ChecklistTemplate("","", "")))
-}
+    val itemTemplateComposeKey: ItemTemplateComposeKey
+) : Serializable
 
 @Embeddable
-class ItemTemplateComposeKey(
-        @ManyToOne
-        @JoinColumn(name="template_id")
-        val template: ChecklistTemplate,
+data class ItemTemplateComposeKey(
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "checklist_template_id")
+        val checklistTemplateId: ChecklistTemplate,
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
         @Column(name="item_template_id")
-        val itemId:Long = -1){
-    private constructor():this(
-            ChecklistTemplate("","", "")
-    )
-}
+        val itemTemplateId : Long
+) : Serializable
