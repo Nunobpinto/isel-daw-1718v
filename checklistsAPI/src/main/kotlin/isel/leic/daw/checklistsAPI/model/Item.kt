@@ -12,6 +12,7 @@ data class Item(
         @Column(name = "item_description")
         val itemDescription : String,
 
+        @Enumerated(EnumType.STRING)
         @Column(name="state")
         val itemState: State,
 

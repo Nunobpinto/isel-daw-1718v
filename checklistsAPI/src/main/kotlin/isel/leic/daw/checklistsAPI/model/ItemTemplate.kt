@@ -12,6 +12,7 @@ data class ItemTemplate (
     @Column(name = "item_template_description")
     val itemTemplateDescription : String,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "item_template_state")
     val itemTemplateState: State ,
 
