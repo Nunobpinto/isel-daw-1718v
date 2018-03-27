@@ -12,11 +12,11 @@ data class ChecklistTemplate(
         @Column(name = "checklist_template_description")
         val checklisttemplateDescription: String,
 
-        @OneToMany(mappedBy = "checklistId")
-        val checklists:MutableSet<Checklist>,
+        @OneToMany(mappedBy = "template")
+        val checklists:MutableSet<Checklist>?=null,
 
         @OneToMany(mappedBy = "itemTemplateComposeKey.checklistTemplateId")
-        val  items:MutableSet<ItemTemplate>,
+        val  items:MutableSet<ItemTemplate>?=null,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "username")

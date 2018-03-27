@@ -10,11 +10,11 @@ data class User (
     @Column(name = "username")
     val  username : String,
 
-    @OneToMany(mappedBy = "checklisttemplateID")
-    val  checklistTemplates:MutableSet<ChecklistTemplate>,
+    @OneToMany(mappedBy = "user")
+    val  checklistTemplates:MutableSet<ChecklistTemplate>?=null,
 
-    @OneToMany(mappedBy = "checklistId")
-    val checklists:MutableSet<Checklist>,
+    @OneToMany(mappedBy = "user")
+    val checklists:MutableSet<Checklist>?=null,
 
     @Column(name = "family_name")
     val familyName: String ?= null,

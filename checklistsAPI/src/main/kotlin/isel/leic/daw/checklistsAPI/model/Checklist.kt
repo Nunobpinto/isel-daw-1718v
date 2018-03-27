@@ -23,7 +23,7 @@ data class Checklist (
     val user: User,
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "itemComposeKey.checklist")
-    val items : MutableSet<Item>,
+    val items : MutableSet<Item>?=null,
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
