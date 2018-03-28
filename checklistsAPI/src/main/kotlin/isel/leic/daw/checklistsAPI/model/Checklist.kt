@@ -1,6 +1,8 @@
 package isel.leic.daw.checklistsAPI.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.Serializable
+import java.time.LocalDate
 import java.util.*
 import javax.persistence.*
 
@@ -11,18 +13,18 @@ data class Checklist (
     val checklistName : String? = null,
 
     @Column(name = "checklist_completion_date")
-    @Temporal(TemporalType.DATE)
-    val completionDate: Date ?= null,
+    val completionDate: LocalDate?= null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "checklist_template_id")
-    val template: ChecklistTemplate,
+    val template: ChecklistTemplate? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "username")
-    val user: User,
+    val user: User? = null,
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "itemComposeKey.checklist")
+    @JsonIgnore
+    @OneToMany(mappedBy = "checklist")
     val items : MutableSet<Item>?=null,
 
     @Id

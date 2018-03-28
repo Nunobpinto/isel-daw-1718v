@@ -1,5 +1,8 @@
 package isel.leic.daw.checklistsAPI.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import org.hibernate.annotations.Generated
+import org.hibernate.annotations.GenerationTime
 import java.io.Serializable
 import javax.persistence.*
 
@@ -7,26 +10,37 @@ import javax.persistence.*
 @Table(name="item")
 data class Item(
         @Column(name="item_name")
-        val itemName : String,
+        val itemName : String? = null,
 
         @Column(name = "item_description")
-        val itemDescription : String,
+        val itemDescription : String?= null,
 
         @Enumerated(EnumType.STRING)
         @Column(name="state")
-        val itemState: State,
+        val itemState: State = State.Uncompleted,
 
-        @EmbeddedId
-        val itemComposeKey: ItemComposeKey
+        @JsonIgnore
+        @ManyToOne
+        @JoinColumn(name = "checklist_id")
+        val checklist: Checklist? = null,
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @Column(name = "item_id")
+        val itemId: Long = -1
+//        @EmbeddedId
+//        val itemComposeKey: ItemComposeKey
 ) : Serializable
 
-@Embeddable
-data class ItemComposeKey(
-        @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        @Column(name="item_id")
-        val itemId : Long,
-
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "checklist_id")
-        val checklist: Checklist
-):Serializable
+//@IdClass(ItemComposeKey::class)
+//@Embeddable
+//data class ItemComposeKey(
+////        @Generated(GenerationTime.INSERT)
+//        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+////        @Column(name="item_id", columnDefinition = "serial")
+//        val itemId : Long = -1,
+//
+//        @ManyToOne(fetch = FetchType.LAZY)
+//        @JoinColumn(name = "checklist_id")
+//        val checklist: Checklist
+//):Serializable
