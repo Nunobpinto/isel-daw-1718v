@@ -10,5 +10,7 @@ class MvcConfig : WebMvcConfigurationSupport() {
     override fun addArgumentResolvers(argumentResolvers: MutableList<HandlerMethodArgumentResolver>) {
         argumentResolvers.add(ChecklistArgumentResolver())
         argumentResolvers.add(ItemArgumentResolver())
+        argumentResolvers.add(ChecklistTemplateArgumentResolver())
+        argumentResolvers.add(ItemTemplateArgumentResolver())
     }
 }
