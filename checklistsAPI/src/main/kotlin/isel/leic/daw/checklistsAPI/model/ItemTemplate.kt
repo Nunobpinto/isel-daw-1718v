@@ -17,10 +17,10 @@ data class ItemTemplate (
     @Column(name = "item_template_state")
     val itemTemplateState: State = State.Uncompleted,
 
-    @JsonIgnore
+        @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "checklist_template_id")
-    val checklistTemplate: ChecklistTemplate?=null,
+    val checklistTemplateId: ChecklistTemplate?=null,
 
         @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

@@ -1,13 +1,12 @@
 package isel.leic.daw.checklistsAPI.controller
 
-import isel.leic.daw.checklistsAPI.model.Checklist
 import isel.leic.daw.checklistsAPI.model.ChecklistTemplate
-import isel.leic.daw.checklistsAPI.model.Item
 import isel.leic.daw.checklistsAPI.model.ItemTemplate
 import isel.leic.daw.checklistsAPI.repo.ChecklistTemplateRepository
 import isel.leic.daw.checklistsAPI.repo.ItemTemplateRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/templates")
@@ -18,7 +17,7 @@ class ChecklistTemplateController{
     @Autowired
     lateinit var itemTemplateRepository: ItemTemplateRepository
 
-    @GetMapping("/")
+    @GetMapping
     fun getAllTemplates() = checklistTemplateRepository.findAll()
 
     @GetMapping("/{checklistTemplateId}")
@@ -35,19 +34,53 @@ class ChecklistTemplateController{
             @PathVariable itemId: Long
     ) = checklistTemplateRepository.findById(checklistTemplateId).get().items?.find { it.itemTemplateId == itemId }
 
-    //TODO: extend WbMvcConfigurationSupport
-    //TODO: create checklistTemplateArgumentResolver
-    @PostMapping("/")
+    @PostMapping
     fun addChecklistTemplate(checklistTemplate: ChecklistTemplate) = checklistTemplateRepository.save(checklistTemplate)
 
-    //TODO: create itemTemplateArgumentResolver
-    @PostMapping("/{checklistId}/items")
+    /*@PostMapping("/{checklistTemplateId}")
+    fun */
+
+    @PostMapping("/{checklistTemplateId}/items")
     fun addItemTemplateToListTemplate(
-            @PathVariable checklistTemplateId: Int,
+            @PathVariable checklistTemplateId: Long,
             itemTemplate: ItemTemplate
     ) = itemTemplateRepository.save(itemTemplate)
 
-    //TODO: PUTs
+    @PutMapping
+    fun updateTemplates(checklistTemplates : List<ChecklistTemplate>) = checklistTemplateRepository.saveAll(checklistTemplates)
+
+    @PutMapping("/{checklistTemplateId}")
+    fun updateSpecificTemplate(
+            @PathVariable checklistTemplateId: Long,
+            checklistTemplate: ChecklistTemplate
+    ) = checklistTemplateRepository.save(checklistTemplate)
+
+    @PutMapping("/{checklistTemplateId}/items")
+    fun updateItemTemplates(
+            @PathVariable checklistTemplateId: Long,
+            itemTemplates: List<ItemTemplate>
+    ) = itemTemplateRepository.saveAll(itemTemplates)
+
+    @PutMapping("/{checklistTemplateId}/items/{itemId}")
+    fun updateItemTemplates(
+            @PathVariable checklistTemplateId: Long,
+            @PathVariable itemId: Long,
+            itemTemplates: List<ItemTemplate>
+    ) = itemTemplateRepository.saveAll(itemTemplates)
+
+    @DeleteMapping
+    fun deleteAllTemplates() = checklistTemplateRepository.deleteAll()
+
+    @DeleteMapping("/{checklistTemplateId}")
+    fun deleteSpecificTemplate(@PathVariable checklistTemplateId: Long) {
+        //TODO ver se é necessário apagar os itens associados primeiro
+        checklistTemplateRepository.delete(checklistTemplateRepository.findById(checklistTemplateId).get())
+    }
+
+    @DeleteMapping("{checklistTemplateId}/items")
+    fun deleteItemTemplates(
+            @PathVariable checklistTemplateId: Long
+    ) = itemTemplateRepository.deleteItemTemplateByChecklistTemplateId(checklistTemplateId)
 
     //TODO: DELETEs
 

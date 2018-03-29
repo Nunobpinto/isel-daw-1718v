@@ -8,7 +8,7 @@ import javax.persistence.*
 @Table(name = "checklist_template")
 data class ChecklistTemplate(
         @Column(name = "checklist_template_name")
-        val checklisttemplateName: String ?= null,
+        val checklistTemplateName: String ?= null,
 
         @Column(name = "checklist_template_description")
         val checklisttemplateDescription: String ?= null,
@@ -18,8 +18,8 @@ data class ChecklistTemplate(
         val checklists:MutableSet<Checklist>?=null,
 
         @JsonIgnore
-        @OneToMany(mappedBy = "checklistTemplate")
-        val  items:MutableSet<ItemTemplate>?=null,
+        @OneToMany(mappedBy = "checklistTemplateId")
+        val items:MutableSet<ItemTemplate>?=null,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "username")
@@ -28,5 +28,5 @@ data class ChecklistTemplate(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE)
         @Column(name = "checklist_template_id")
-        val checklisttemplateID: Long = -1
+        val checklistTemplateId: Long = -1
 ) : Serializable

@@ -1,6 +1,5 @@
 package isel.leic.daw.checklistsAPI
 
-import isel.leic.daw.checklistsAPI.model.Checklist
 import isel.leic.daw.checklistsAPI.model.ChecklistTemplate
 import isel.leic.daw.checklistsAPI.model.ItemTemplate
 import org.springframework.core.MethodParameter
@@ -28,7 +27,7 @@ class ItemTemplateArgumentResolver : HandlerMethodArgumentResolver {
         return ItemTemplate(
                 itemTemplateName = name,
                 itemTemplateDescription = desc,
-                checklistTemplate = ChecklistTemplate(checklisttemplateID = id!!)
+                checklistTemplateId = ChecklistTemplate(checklistTemplateId = id!!)
         )
     }
 
