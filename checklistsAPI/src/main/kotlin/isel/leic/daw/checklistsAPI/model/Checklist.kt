@@ -15,6 +15,7 @@ data class Checklist (
     @Column(name = "checklist_completion_date")
     val completionDate: LocalDate?= null,
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "checklist_template_id")
     val template: ChecklistTemplate? = null,

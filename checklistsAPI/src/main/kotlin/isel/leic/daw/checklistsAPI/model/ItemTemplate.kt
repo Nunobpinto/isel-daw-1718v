@@ -1,32 +1,29 @@
 package isel.leic.daw.checklistsAPI.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.Serializable
 import javax.persistence.*
 
 @Entity
 @Table(name="item_template")
 data class ItemTemplate (
-    @Column(name = "item_template_name")
-    val itemTemplateName : String,
+        @Column(name = "item_template_name")
+    val itemTemplateName : String ?= null,
 
-    @Column(name = "item_template_description")
-    val itemTemplateDescription : String,
+        @Column(name = "item_template_description")
+    val itemTemplateDescription : String ?= null,
 
-    @Enumerated(EnumType.STRING)
+        @Enumerated(EnumType.STRING)
     @Column(name = "item_template_state")
-    val itemTemplateState: State ,
+    val itemTemplateState: State = State.Uncompleted,
 
-    @EmbeddedId
-    val itemTemplateComposeKey: ItemTemplateComposeKey
-) : Serializable
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "checklist_template_id")
+    val checklistTemplate: ChecklistTemplate?=null,
 
-@Embeddable
-data class ItemTemplateComposeKey(
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "checklist_template_id")
-        val checklistTemplateId: ChecklistTemplate,
-
-        @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        @Column(name="item_template_id")
-        val itemTemplateId : Long
+        @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name="item_template_id")
+    val itemTemplateId : Long = -1
 ) : Serializable
