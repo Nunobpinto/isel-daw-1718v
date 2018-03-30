@@ -1,4 +1,4 @@
-package isel.leic.daw.checklistsAPI
+package isel.leic.daw.checklistsAPI.configuration.argumentResolver
 
 import isel.leic.daw.checklistsAPI.model.Checklist
 import isel.leic.daw.checklistsAPI.model.Item
@@ -23,8 +23,8 @@ class ItemArgumentResolver : HandlerMethodArgumentResolver {
 
         val name: String? = webRequest.getParameter("item_name")
         val desc: String? = webRequest.getParameter("item_desc")
-
         val id = getPathVariables(webRequest)["checklistId"]?.toLong()
+
         return Item(
                 itemName = name,
                 itemDescription = desc,

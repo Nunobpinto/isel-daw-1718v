@@ -1,4 +1,4 @@
-package isel.leic.daw.checklistsAPI
+package isel.leic.daw.checklistsAPI.configuration.argumentResolver
 
 import isel.leic.daw.checklistsAPI.model.ChecklistTemplate
 import isel.leic.daw.checklistsAPI.model.ItemTemplate

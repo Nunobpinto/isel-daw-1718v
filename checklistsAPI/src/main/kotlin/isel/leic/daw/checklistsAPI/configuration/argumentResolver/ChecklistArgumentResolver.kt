@@ -1,4 +1,4 @@
-package isel.leic.daw.checklistsAPI
+package isel.leic.daw.checklistsAPI.configuration.argumentResolver
 
 import isel.leic.daw.checklistsAPI.model.Checklist
 import org.springframework.core.MethodParameter
@@ -7,7 +7,6 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 import java.time.LocalDate
-import javax.servlet.http.HttpServletRequest
 
 class ChecklistArgumentResolver : HandlerMethodArgumentResolver {
 
