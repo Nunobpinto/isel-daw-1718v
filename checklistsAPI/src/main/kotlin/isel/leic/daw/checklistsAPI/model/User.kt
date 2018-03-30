@@ -23,6 +23,9 @@ data class User (
     val givenName : String ?= null,
 
     @Column(name = "email")
-    val email : String ?= null
+    val email : String ?= null,
+
+    @Column(name = "password")
+    val password : String ?= null
 
 ) : Serializable
