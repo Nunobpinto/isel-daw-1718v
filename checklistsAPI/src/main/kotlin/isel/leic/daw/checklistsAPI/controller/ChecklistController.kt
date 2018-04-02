@@ -32,8 +32,6 @@ class ChecklistController {
             @PathVariable itemId: Long
     ) = checklistRepository.findById(checklistId).get().items?.find { it.itemId == itemId }
 
-    //TODO: extend WbMvcConfigurationSupport
-    //TODO: create checklistArgumentResolver
     @PostMapping("/")
     fun addChecklist(checklist: Checklist) = checklistRepository.save(checklist)
 

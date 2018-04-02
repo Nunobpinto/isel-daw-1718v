@@ -1,4 +1,4 @@
-package isel.leic.daw.checklistsAPI
+package isel.leic.daw.checklistsAPI.configuration.argumentResolver
 
 import isel.leic.daw.checklistsAPI.model.ChecklistTemplate
 import org.springframework.core.MethodParameter
@@ -6,7 +6,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
-import java.time.LocalDate
 
 class ChecklistTemplateArgumentResolver : HandlerMethodArgumentResolver {
 
@@ -21,7 +20,7 @@ class ChecklistTemplateArgumentResolver : HandlerMethodArgumentResolver {
         val name: String? = webRequest.getParameter("checklistTemplate_name")
         val description: String? = webRequest.getParameter("checklistTemplate_description")
         return ChecklistTemplate(
-                checklisttemplateName = name,
+                checklistTemplateName = name,
                 checklisttemplateDescription = description
         )
     }

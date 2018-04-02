@@ -1,8 +1,7 @@
-package isel.leic.daw.checklistsAPI
+package isel.leic.daw.checklistsAPI.configuration.argumentResolver
 
 import isel.leic.daw.checklistsAPI.model.Checklist
-import isel.leic.daw.checklistsAPI.model.ChecklistTemplate
-import isel.leic.daw.checklistsAPI.model.ItemTemplate
+import isel.leic.daw.checklistsAPI.model.Item
 import org.springframework.core.MethodParameter
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
@@ -11,9 +10,10 @@ import org.springframework.web.method.support.ModelAndViewContainer
 import org.springframework.web.servlet.HandlerMapping
 import javax.servlet.http.HttpServletRequest
 
-class ItemTemplateArgumentResolver : HandlerMethodArgumentResolver {
 
-    override fun supportsParameter(parameter: MethodParameter) = parameter.parameterType == ItemTemplate::class.java
+class ItemArgumentResolver : HandlerMethodArgumentResolver {
+
+    override fun supportsParameter(parameter: MethodParameter) = parameter.parameterType == Item::class.java
 
     override fun resolveArgument(
             parameter: MethodParameter,
@@ -21,14 +21,14 @@ class ItemTemplateArgumentResolver : HandlerMethodArgumentResolver {
             webRequest: NativeWebRequest,
             binderFactory: WebDataBinderFactory?): Any? {
 
-        val name: String? = webRequest.getParameter("itemTemplate_name")
-        val desc: String? = webRequest.getParameter("itemTemplate_desc")
+        val name: String? = webRequest.getParameter("item_name")
+        val desc: String? = webRequest.getParameter("item_desc")
+        val id = getPathVariables(webRequest)["checklistId"]?.toLong()
 
-        val id = getPathVariables(webRequest)["checklistTemplateId"]?.toLong()
-        return ItemTemplate(
-                itemTemplateName = name,
-                itemTemplateDescription = desc,
-                checklistTemplate = ChecklistTemplate(checklisttemplateID = id!!)
+        return Item(
+                itemName = name,
+                itemDescription = desc,
+                checklist = Checklist(checklistId = id!!)
         )
     }
 
@@ -37,4 +37,5 @@ class ItemTemplateArgumentResolver : HandlerMethodArgumentResolver {
         val httpServletRequest = webRequest.getNativeRequest(HttpServletRequest::class.java)
         return httpServletRequest?.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<String, String>
     }
+
 }
