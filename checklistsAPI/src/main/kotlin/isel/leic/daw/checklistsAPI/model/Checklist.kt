@@ -16,16 +16,17 @@ data class Checklist (
     val completionDate: LocalDate?= null,
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "checklist_template_id")
     val template: ChecklistTemplate? = null,
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "username")
     val user: User? = null,
 
     @JsonIgnore
-    @OneToMany(mappedBy = "checklist")
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "checklist")
     val items : MutableSet<Item>?=null,
 
     @Id

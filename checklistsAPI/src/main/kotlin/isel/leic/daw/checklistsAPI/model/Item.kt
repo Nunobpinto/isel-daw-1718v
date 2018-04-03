@@ -20,7 +20,7 @@ data class Item(
         val itemState: State = State.Uncompleted,
 
         @JsonIgnore
-        @ManyToOne
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "checklist_id")
         val checklist: Checklist? = null,
 

@@ -14,14 +14,15 @@ data class ChecklistTemplate(
         val checklisttemplateDescription: String ?= null,
 
         @JsonIgnore
-        @OneToMany(mappedBy = "template")
+        @OneToMany(fetch = FetchType.LAZY,mappedBy = "template")
         val checklists:MutableSet<Checklist>?=null,
 
         @JsonIgnore
-        @OneToMany(mappedBy = "checklistTemplateId")
+        @OneToMany(fetch = FetchType.LAZY,mappedBy = "checklistTemplateId")
         val items:MutableSet<ItemTemplate>?=null,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @JsonIgnore
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "username")
         val user: User? = null,
 

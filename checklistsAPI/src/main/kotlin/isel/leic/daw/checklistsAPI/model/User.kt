@@ -1,5 +1,6 @@
 package isel.leic.daw.checklistsAPI.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.Serializable
 import javax.persistence.*
 
@@ -10,6 +11,7 @@ data class User (
     @Column(name = "username")
     val  username : String,
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     val  checklistTemplates:MutableSet<ChecklistTemplate>?=null,
 
