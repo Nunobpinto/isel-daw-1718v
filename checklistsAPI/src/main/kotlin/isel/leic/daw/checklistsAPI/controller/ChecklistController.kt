@@ -59,7 +59,29 @@ class ChecklistController {
             item: Item
     ) = itemRepository.save(item)
 
-    //TODO: PUTs
+    @PutMapping
+    fun updateChecklists(checklists: List<Checklist>) = checklistRepository.saveAll(checklists)
+
+    @PutMapping("/{checklistId}")
+    fun updateSpecificChecklist(
+            @PathVariable checklistId: Long,
+            checklist: Checklist
+    ) = checklistRepository.save(checklist)
+
+    @PutMapping("/{checklistId}/items")
+    fun updateItems(
+            @PathVariable checklistId: Long,
+            items: List<Item>
+    ) = itemRepository.saveAll(items)
+
+    @PutMapping("/{checklistId}/items/{itemId}")
+    fun updateItem(
+            @PathVariable checklistId: Long,
+            @PathVariable itemId: Long,
+            item: Item
+    ) = itemRepository.save(item)
+
+
 
     //TODO: DELETEs
 
