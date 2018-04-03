@@ -25,14 +25,19 @@ class ChecklistTemplateController{
             = checklistTemplateRepository.findById(checklistTemplateId)
 
     @GetMapping("/{checklistTemplateId}/items")
-    fun getItemsOfChecklistTemplate(@PathVariable checklistTemplateId: Long)
-            = checklistTemplateRepository.findById(checklistTemplateId).get().items
+    fun getItemsOfChecklistTemplate(@PathVariable checklistTemplateId: Long):List<ItemTemplate>{
+        val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
+        return itemTemplateRepository.findByChecklistTemplateId(checklistTemplate)
+    }
 
     @GetMapping("/{checklistTemplateId}/items/{itemId}")
     fun getItemOfChecklist(
             @PathVariable checklistTemplateId: Long,
             @PathVariable itemId: Long
-    ) = checklistTemplateRepository.findById(checklistTemplateId).get().items?.find { it.itemTemplateId == itemId }
+    ) : ItemTemplate {
+        val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
+        return itemTemplateRepository.findByChecklistTemplateIdAndItemTemplateId(checklistTemplate,itemId)
+    }
 
     @PostMapping
     fun addChecklistTemplate(checklistTemplate: ChecklistTemplate) = checklistTemplateRepository.save(checklistTemplate)
