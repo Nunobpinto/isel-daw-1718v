@@ -25,7 +25,7 @@ class ChecklistTemplateArgumentResolver : HandlerMethodArgumentResolver {
         val username =httpServletRequest!!.userPrincipal.name!!
         return ChecklistTemplate(
                 checklistTemplateName = name,
-                checklisttemplateDescription = description,
+                checklistTemplateDescription = description,
                 user= User(username = username)
         )
     }

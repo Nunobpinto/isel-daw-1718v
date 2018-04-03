@@ -8,18 +8,23 @@ import javax.persistence.*
 @Table(name = "checklist_template")
 data class ChecklistTemplate(
         @Column(name = "checklist_template_name")
-        val checklistTemplateName: String ?= null,
+        val checklistTemplateName: String? = null,
 
         @Column(name = "checklist_template_description")
-        val checklisttemplateDescription: String ?= null,
+        val checklistTemplateDescription: String? = null,
 
         @JsonIgnore
-        @OneToMany(fetch = FetchType.LAZY,mappedBy = "template")
-        val checklists:MutableSet<Checklist>?=null,
+        @OneToMany(mappedBy = "template", fetch = FetchType.LAZY, cascade = [(CascadeType.PERSIST)])
+        val checklists: MutableSet<Checklist>? = null,
 
         @JsonIgnore
-        @OneToMany(fetch = FetchType.LAZY,mappedBy = "checklistTemplateId")
-        val items:MutableSet<ItemTemplate>?=null,
+        @OneToMany(
+                mappedBy = "checklistTemplateId",
+                fetch = FetchType.LAZY,
+                cascade = [(CascadeType.ALL)],
+                orphanRemoval = true
+        )
+        val items: MutableSet<ItemTemplate>? = null,
 
         @JsonIgnore
         @ManyToOne(fetch = FetchType.EAGER)
