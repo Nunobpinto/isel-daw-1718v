@@ -23,7 +23,7 @@ data class ChecklistTemplate(
         val checklists: MutableSet<Checklist>? = null,
 
         @JsonIgnore
-        @OneToMany(mappedBy = "checklistTemplateId", cascade = [(CascadeType.ALL)], orphanRemoval = true)
+        @OneToMany(mappedBy = "checklistTemplate", cascade = [(CascadeType.ALL)], orphanRemoval = true)
         val items: MutableSet<ItemTemplate>? = null,
 
         @JsonIgnore

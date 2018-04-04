@@ -1,8 +1,8 @@
 package isel.leic.daw.checklistsAPI.controller
 
-import isel.leic.daw.checklistsAPI.inputModel.ChecklistInputModel
-import isel.leic.daw.checklistsAPI.inputModel.ChecklistTemplateInputModel
-import isel.leic.daw.checklistsAPI.inputModel.ItemTemplateInputModel
+import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
+import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistTemplateInputModel
+import isel.leic.daw.checklistsAPI.inputModel.single.ItemTemplateInputModel
 import isel.leic.daw.checklistsAPI.model.*
 import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
 import isel.leic.daw.checklistsAPI.repo.ChecklistTemplateRepository
@@ -14,10 +14,9 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.core.context.SecurityContextHolder
 
 
-
 @RestController
 @RequestMapping("/templates")
-class ChecklistTemplateController{
+class ChecklistTemplateController {
 
     @Autowired
     lateinit var checklistTemplateRepository: ChecklistTemplateRepository
@@ -28,7 +27,7 @@ class ChecklistTemplateController{
     @Autowired
     lateinit var itemRepository: ItemRepository
 
-    fun getUsername() : String {
+    fun getUsername(): String {
         val auth = SecurityContextHolder.getContext().authentication
         return auth.name
     }
@@ -37,39 +36,32 @@ class ChecklistTemplateController{
     fun getAllTemplates() = checklistTemplateRepository.findAll()
 
     @GetMapping("/{checklistTemplateId}")
-    fun getTemplate(@PathVariable checklistTemplateId: Long)
-            = checklistTemplateRepository.findById(checklistTemplateId)
+    fun getTemplate(@PathVariable checklistTemplateId: Long) = checklistTemplateRepository.findById(checklistTemplateId)
 
     @GetMapping("/{checklistTemplateId}/items")
-    fun getItemsOfChecklistTemplate(@PathVariable checklistTemplateId: Long):List<ItemTemplate>{
+    fun getItemsOfChecklistTemplate(@PathVariable checklistTemplateId: Long): List<ItemTemplate> {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
-        return itemTemplateRepository.findByChecklistTemplateId(checklistTemplate)
+        return itemTemplateRepository.findByChecklistTemplate(checklistTemplate)
     }
 
     @GetMapping("/{checklistTemplateId}/items/{itemId}")
-    fun getItemOfChecklist(
-            @PathVariable checklistTemplateId: Long,
-            @PathVariable itemId: Long
-    ) : ItemTemplate {
+    fun getItemOfChecklist(@PathVariable checklistTemplateId: Long, @PathVariable itemId: Long): ItemTemplate {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
-        return itemTemplateRepository.findByChecklistTemplateIdAndItemTemplateId(checklistTemplate,itemId)
+        return itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
     }
 
     @PostMapping
-    fun addChecklistTemplate(@RequestBody input: ChecklistTemplateInputModel) : ChecklistTemplate {
+    fun addChecklistTemplate(@RequestBody input: ChecklistTemplateInputModel): ChecklistTemplate {
         val template = ChecklistTemplate(
-                checklistTemplateName =input.checklistTemplateName,
+                checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateDescription = input.checklistTemplateDescription,
                 user = User(username = getUsername())
         )
-       return checklistTemplateRepository.save(template)
+        return checklistTemplateRepository.save(template)
     }
 
     @PostMapping("/{checklistTemplateId}")
-    fun createChecklistFromTemplate(
-            @PathVariable checklistTemplateId: Long,
-            @RequestBody input : ChecklistInputModel
-    ) : Checklist {
+    fun createChecklistFromTemplate(@PathVariable checklistTemplateId: Long, @RequestBody input: ChecklistInputModel): Checklist {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         var checklist = Checklist(
                 checklistName = input.checklistName,
@@ -80,45 +72,37 @@ class ChecklistTemplateController{
         )
         checklist = checklistRepository.save(checklist)
         val items = itemTemplateRepository
-                .findByChecklistTemplateId(template)
-                .map { itemTemplate -> Item(itemName = itemTemplate.itemTemplateName,
-                        itemDescription = itemTemplate.itemTemplateDescription,
-                        itemState = itemTemplate.itemTemplateState,
-                        checklist = checklist)
+                .findByChecklistTemplate(template)
+                .map { itemTemplate ->
+                    Item(itemName = itemTemplate.itemTemplateName,
+                            itemDescription = itemTemplate.itemTemplateDescription,
+                            itemState = itemTemplate.itemTemplateState,
+                            checklist = checklist)
                 }
         itemRepository.saveAll(items)
         return checklist
     }
 
     @PostMapping("/{checklistTemplateId}/items")
-    fun addItemTemplateToListTemplate(
-            @PathVariable checklistTemplateId: Long,
-            @RequestBody input: ItemTemplateInputModel
-    ) : ItemTemplate{
+    fun addItemTemplateToListTemplate(@PathVariable checklistTemplateId: Long,@RequestBody input: ItemTemplateInputModel): ItemTemplate {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,
                 itemTemplateDescription = input.itemTemplateDescription,
                 itemTemplateState = State.valueOf(input.itemTemplateState),
-                checklistTemplateId = template
+                checklistTemplate = template
         )
         return itemTemplateRepository.save(itemTemplate)
     }
 
     @PutMapping
-    fun updateChecklistTemplates(checklistTemplates : List<ChecklistTemplate>) = checklistTemplateRepository.saveAll(checklistTemplates)
+    fun updateChecklistTemplates(checklistTemplates: List<ChecklistTemplate>) = checklistTemplateRepository.saveAll(checklistTemplates)
 
     @PutMapping("/{checklistTemplateId}")
-    fun updateSpecificChecklistTemplate(
-            @PathVariable checklistTemplateId: Long,
-            checklistTemplate: ChecklistTemplate
-    ) = checklistTemplateRepository.save(checklistTemplate)
+    fun updateSpecificChecklistTemplate(@PathVariable checklistTemplateId: Long, checklistTemplate: ChecklistTemplate) = checklistTemplateRepository.save(checklistTemplate)
 
     @PutMapping("/{checklistTemplateId}/items")
-    fun updateItemTemplates(
-            @PathVariable checklistTemplateId: Long,
-            itemTemplates: List<ItemTemplate>
-    ) = itemTemplateRepository.saveAll(itemTemplates)
+    fun updateItemTemplates(@PathVariable checklistTemplateId: Long, itemTemplates: List<ItemTemplate>) = itemTemplateRepository.saveAll(itemTemplates)
 
     @PutMapping("/{checklistTemplateId}/items/{itemId}")
     fun updateItemTemplate(
@@ -128,20 +112,16 @@ class ChecklistTemplateController{
     ) = itemTemplateRepository.save(itemTemplate)
 
     @DeleteMapping
-    fun deleteAllChecklistTemplates() = checklistTemplateRepository.deleteAll()
+    fun deleteAllTemplates() = checklistTemplateRepository.deleteAll()
 
     @DeleteMapping("/{checklistTemplateId}")
-    fun deleteSpecificTemplate(@PathVariable checklistTemplateId: Long) {
-        //TODO ver se é necessário apagar os itens associados primeiro
-        checklistTemplateRepository.delete(checklistTemplateRepository.findById(checklistTemplateId).get())
-    }
+    fun deleteSpecificTemplate(@PathVariable checklistTemplateId: Long) = checklistTemplateRepository.deleteById(checklistTemplateId)
 
     @DeleteMapping("{checklistTemplateId}/items")
-    fun deleteItemTemplates(
-            @PathVariable checklistTemplateId: Long
-    ) = itemTemplateRepository.deleteItemTemplateByChecklistTemplateId(checklistTemplateId)
+    fun deleteItemTemplate(@PathVariable checklistTemplateId: Long) = itemTemplateRepository.deleteByChecklistTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
 
-    //TODO: DELETEs
+    @DeleteMapping("{checklistTemplateId}/items/{itemTemplateId}")
+    fun deleteSpecificItemTemplate(@PathVariable checklistTemplateId: Long, @PathVariable itemTemplateId: Long) = itemTemplateRepository.deleteByChecklistTemplateAndItemTemplateId(ChecklistTemplate(checklistTemplateId = checklistTemplateId), itemTemplateId)
 
     //TODO: PATCHs
 

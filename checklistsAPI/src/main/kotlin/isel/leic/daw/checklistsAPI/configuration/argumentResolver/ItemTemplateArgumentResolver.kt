@@ -23,11 +23,11 @@ class ItemTemplateArgumentResolver : HandlerMethodArgumentResolver {
         val name: String? = webRequest.getParameter("itemTemplate_name")
         val desc: String? = webRequest.getParameter("itemTemplate_desc")
 
-        val id = getPathVariables(webRequest)["checklistTemplateId"]?.toLong()
+        val id = getPathVariables(webRequest)["checklistTemplate"]?.toLong()
         return ItemTemplate(
                 itemTemplateName = name,
                 itemTemplateDescription = desc,
-                checklistTemplateId = ChecklistTemplate(checklistTemplateId = id!!)
+                checklistTemplate = ChecklistTemplate(checklistTemplateId = id!!)
         )
     }
 

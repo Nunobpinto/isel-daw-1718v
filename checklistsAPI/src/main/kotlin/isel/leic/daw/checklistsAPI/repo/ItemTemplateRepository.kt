@@ -9,11 +9,13 @@ import org.springframework.transaction.annotation.Transactional
 @Repository
 interface ItemTemplateRepository : CrudRepository<ItemTemplate, Long> {
 
-    fun findByChecklistTemplateId(checklistTemplate: ChecklistTemplate) : List<ItemTemplate>
-
-    fun findByChecklistTemplateIdAndItemTemplateId(checklistTemplate: ChecklistTemplate,itemTemplateId: Long)
-            : ItemTemplate
+    @Transactional
+    fun deleteByChecklistTemplate(checklistTemplate: ChecklistTemplate): Long
 
     @Transactional
-    fun deleteItemTemplateByChecklistTemplateId(checklistTemplateId : Long) : List<ItemRepository>
+    fun deleteByChecklistTemplateAndItemTemplateId(checklistTemplate: ChecklistTemplate, itemTemplateId: Long): Long
+
+    fun findByChecklistTemplate(checklistTemplate: ChecklistTemplate) : List<ItemTemplate>
+
+    fun findByChecklistTemplateAndItemTemplateId(checklistTemplate: ChecklistTemplate, itemTemplateId: Long) : ItemTemplate
 }

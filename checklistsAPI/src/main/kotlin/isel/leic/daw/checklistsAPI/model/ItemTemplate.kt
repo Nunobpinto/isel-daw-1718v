@@ -23,9 +23,9 @@ data class ItemTemplate(
         val itemTemplateState: State = State.Uncompleted,
 
         @JsonIgnore
-        @ManyToOne(fetch = FetchType.EAGER)
+        @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "checklist_template_id", nullable = false)
-        val checklistTemplateId: ChecklistTemplate? = null
+        val checklistTemplate: ChecklistTemplate? = null
 ) : Serializable {
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true
