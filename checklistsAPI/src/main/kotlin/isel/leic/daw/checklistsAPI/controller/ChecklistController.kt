@@ -83,7 +83,17 @@ class ChecklistController {
 
 
 
-    //TODO: DELETEs
+    @DeleteMapping
+    fun deleteAllChecklists() = checklistRepository.deleteAll()
+
+    @DeleteMapping("/{checklistId}")
+    fun deleteSpecificChecklist(@PathVariable checklistId: Long) = checklistRepository.deleteById(checklistId)
+
+    @DeleteMapping("{checklistId}/items")
+    fun deleteItem(@PathVariable checklistId: Long) = itemRepository.deleteByChecklist(Checklist(checklistId = checklistId))
+
+    @DeleteMapping("{checklistId}/items/{itemId}")
+    fun deleteSpecificItem(@PathVariable checklistId: Long, @PathVariable itemId: Long) = itemRepository.deleteByChecklistAndItemId(Checklist(checklistId = checklistId), itemId)
 
     //TODO: PATCHs
 

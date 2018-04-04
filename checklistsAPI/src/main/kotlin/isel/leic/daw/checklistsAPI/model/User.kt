@@ -11,14 +11,6 @@ data class User(
         @Column(name = "username")
         val username: String,
 
-        @JsonIgnore
-        @OneToMany(mappedBy = "user")
-        val checklistTemplates: MutableSet<ChecklistTemplate>? = null,
-
-        @JsonIgnore
-        @OneToMany(mappedBy = "user")
-        val checklists: MutableSet<Checklist>? = null,
-
         @Column(name = "family_name")
         val familyName: String? = null,
 
@@ -29,6 +21,13 @@ data class User(
         val email: String? = null,
 
         @Column(name = "password")
-        val password: String? = null
+        val password: String? = null,
 
+        @JsonIgnore
+        @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+        val checklistTemplates: MutableSet<ChecklistTemplate>? = null,
+
+        @JsonIgnore
+        @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+        val checklists: MutableSet<Checklist>? = null
 ) : Serializable

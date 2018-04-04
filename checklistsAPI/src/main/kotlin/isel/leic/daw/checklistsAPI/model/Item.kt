@@ -1,6 +1,7 @@
 package isel.leic.daw.checklistsAPI.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.Generated
 import org.hibernate.annotations.GenerationTime
 import java.io.Serializable
@@ -9,6 +10,11 @@ import javax.persistence.*
 @Entity
 @Table(name = "item")
 data class Item(
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @Column(name = "item_id")
+        val itemId: Long = -1,
+
         @Column(name = "item_name")
         val itemName: String? = null,
 
@@ -20,12 +26,14 @@ data class Item(
         val itemState: State = State.Uncompleted,
 
         @JsonIgnore
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "checklist_id")
-        val checklist: Checklist? = null,
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "checklist_id", nullable = false)
+        val checklist: Checklist? = null
+) : Serializable {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                return if (other !is Item) false else itemId == other.itemId
+        }
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        @Column(name = "item_id")
-        val itemId: Long = -1
-) : Serializable
+        override fun hashCode(): Int = 31
+}

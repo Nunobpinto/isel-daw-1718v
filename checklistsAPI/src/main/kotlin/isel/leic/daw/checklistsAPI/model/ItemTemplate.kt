@@ -7,6 +7,11 @@ import javax.persistence.*
 @Entity
 @Table(name = "item_template")
 data class ItemTemplate(
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @Column(name = "item_template_id")
+        val itemTemplateId: Long = -1,
+
         @Column(name = "item_template_name")
         val itemTemplateName: String? = null,
 
@@ -19,11 +24,13 @@ data class ItemTemplate(
 
         @JsonIgnore
         @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "checklist_template_id")
-        val checklistTemplateId: ChecklistTemplate? = null,
+        @JoinColumn(name = "checklist_template_id", nullable = false)
+        val checklistTemplateId: ChecklistTemplate? = null
+) : Serializable {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                return if (other !is ItemTemplate) false else itemTemplateId == other.itemTemplateId
+        }
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        @Column(name = "item_template_id")
-        val itemTemplateId: Long = -1
-) : Serializable
+        override fun hashCode(): Int = 30
+}

@@ -9,6 +9,11 @@ import javax.persistence.*
 @Entity
 @Table(name = "checklist")
 data class Checklist(
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @Column(name = "checklist_id")
+        val checklistId: Long = -1,
+
         @Column(name = "checklist_name")
         val checklistName: String? = null,
 
@@ -16,21 +21,23 @@ data class Checklist(
         val completionDate: LocalDate? = null,
 
         @JsonIgnore
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "checklist_template_id")
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "checklist_template_id", nullable = true)
         val template: ChecklistTemplate? = null,
 
         @JsonIgnore
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "username")
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "username", nullable = false)
         val user: User? = null,
 
         @JsonIgnore
         @OneToMany(mappedBy = "checklist", fetch = FetchType.LAZY, cascade = [(CascadeType.ALL)], orphanRemoval = true)
-        val items: MutableSet<Item>? = null,
+        val items: MutableSet<Item>? = null
+) : Serializable {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                return if (other !is Checklist) false else checklistId == other.checklistId
+        }
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        @Column(name = "checklist_id")
-        val checklistId: Long = -1
-) : Serializable
+        override fun hashCode(): Int = 33
+}
