@@ -5,5 +5,4 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ChecklistTemplateRepository: CrudRepository<ChecklistTemplate, Long> {
-}
+interface ChecklistTemplateRepository: CrudRepository<ChecklistTemplate, Long>

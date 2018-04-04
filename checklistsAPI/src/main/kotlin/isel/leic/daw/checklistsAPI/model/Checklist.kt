@@ -23,7 +23,7 @@ data class Checklist(
         @JsonIgnore
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "checklist_template_id", nullable = true)
-        val template: ChecklistTemplate? = null,
+        var template: ChecklistTemplate? = null,
 
         @JsonIgnore
         @ManyToOne(fetch = FetchType.LAZY)

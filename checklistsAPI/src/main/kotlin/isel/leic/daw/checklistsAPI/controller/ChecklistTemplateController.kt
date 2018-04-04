@@ -84,7 +84,7 @@ class ChecklistTemplateController {
     }
 
     @PostMapping("/{checklistTemplateId}/items")
-    fun addItemTemplateToListTemplate(@PathVariable checklistTemplateId: Long,@RequestBody input: ItemTemplateInputModel): ItemTemplate {
+    fun addItemTemplateToListTemplate(@PathVariable checklistTemplateId: Long, @RequestBody input: ItemTemplateInputModel): ItemTemplate {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,
@@ -115,7 +115,14 @@ class ChecklistTemplateController {
     fun deleteAllTemplates() = checklistTemplateRepository.deleteAll()
 
     @DeleteMapping("/{checklistTemplateId}")
-    fun deleteSpecificTemplate(@PathVariable checklistTemplateId: Long) = checklistTemplateRepository.deleteById(checklistTemplateId)
+    fun deleteSpecificTemplate(@PathVariable checklistTemplateId: Long) {
+        val checklists: List<Checklist> = checklistRepository.findByTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
+        if( checklists.isNotEmpty() ) {
+            checklists.forEach { it.template = null }
+            checklistRepository.saveAll(checklists)
+        }
+        checklistTemplateRepository.deleteById(checklistTemplateId)
+    }
 
     @DeleteMapping("{checklistTemplateId}/items")
     fun deleteItemTemplate(@PathVariable checklistTemplateId: Long) = itemTemplateRepository.deleteByChecklistTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
