@@ -8,5 +8,7 @@ class ItemInputModel (
         @JsonProperty("description")
         val itemDescription: String,
         @JsonProperty("state")
-        val itemState: String
+        val itemState: String,
+        @JsonProperty("id")
+        val itemId: Long
 )
