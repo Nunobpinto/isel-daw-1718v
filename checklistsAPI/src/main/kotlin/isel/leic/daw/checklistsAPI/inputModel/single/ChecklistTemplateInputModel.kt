@@ -7,5 +7,9 @@ class ChecklistTemplateInputModel (
     @JsonProperty("name")
     val checklistTemplateName: String,
     @JsonProperty("description")
-    val checklistTemplateDescription: String
+    val checklistTemplateDescription: String,
+    @JsonProperty("id")
+    val checklistTemplateId: Long
+
+
 )
