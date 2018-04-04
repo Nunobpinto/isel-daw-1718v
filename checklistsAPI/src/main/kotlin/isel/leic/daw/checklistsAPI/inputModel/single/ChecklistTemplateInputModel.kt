@@ -1,4 +1,4 @@
-package isel.leic.daw.checklistsAPI.inputModel
+package isel.leic.daw.checklistsAPI.inputModel.single
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
