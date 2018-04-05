@@ -28,7 +28,12 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         http
                 .csrf().disable()
-                .authorizeRequests().antMatchers(PROTECTED_URI_PATTERN).hasRole("USER")
+                .authorizeRequests()
+                /*
+                .antMatchers(PROTECTED_URI_PATTERN).hasRole("USER")
+                 */
+                .antMatchers("/users/register/**").permitAll()
+                .anyRequest().authenticated()
                 .and().httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
