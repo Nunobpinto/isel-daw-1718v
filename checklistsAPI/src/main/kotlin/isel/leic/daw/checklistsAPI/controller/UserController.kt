@@ -20,7 +20,7 @@ class UserController {
     }
 
     @GetMapping("/{userId}")
-    fun getUser(@PathVariable userId: String) = userRepository.findById(userId)
+    fun getUser(@PathVariable userId: String) = userRepository.findById(userId).get()
 
     @PostMapping("/register")
     fun registerUser(@RequestBody input: UserInputModel) : User{

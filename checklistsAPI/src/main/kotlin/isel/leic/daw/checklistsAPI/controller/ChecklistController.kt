@@ -38,7 +38,7 @@ class ChecklistController {
     fun getAllChecklists() = checklistRepository.findAll()
 
     @GetMapping("/{checklistId}")
-    fun getChecklist(@PathVariable checklistId: Long) = checklistRepository.findById(checklistId)
+    fun getChecklist(@PathVariable checklistId: Long) = checklistRepository.findById(checklistId).get()
 
     @GetMapping("/{checklistId}/items")
     fun getItemsOfChecklist(@PathVariable checklistId: Long): List<Item> {
