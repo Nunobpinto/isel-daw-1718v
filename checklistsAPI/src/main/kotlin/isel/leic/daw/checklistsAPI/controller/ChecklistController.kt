@@ -47,14 +47,12 @@ class ChecklistController {
     }
 
     @GetMapping("/{checklistId}/items/{itemId}")
-    fun getItemOfChecklist(
-            @PathVariable checklistId: Long,
-            @PathVariable itemId: Long
-    ): ResponseEntity<Entity> {
+    fun getItemOfChecklist(@PathVariable checklistId: Long,@PathVariable itemId: Long): ResponseEntity<Entity> {
         val checklist = checklistRepository.findById(checklistId).get()
         val item = itemRepository.findByChecklistAndItemId(checklist, itemId)
         val output = ItemOutputModel(
-                identifier = item.itemId.toInt(),
+                checklistId = checklistId,
+                itemId = item.itemId,
                 name = item.itemName!!,
                 description = item.itemDescription!!,
                 state = item.itemState.name
