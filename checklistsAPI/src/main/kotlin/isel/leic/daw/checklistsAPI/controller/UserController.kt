@@ -6,9 +6,11 @@ import isel.leic.daw.checklistsAPI.inputModel.single.UserInputModel
 import isel.leic.daw.checklistsAPI.model.User
 import isel.leic.daw.checklistsAPI.repo.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import com.google.code.siren4j.component.Entity
 
 @RestController
 @RequestMapping("/users",produces = [Siren4J.JSON_MEDIATYPE])
@@ -23,11 +25,13 @@ class UserController {
 
     @ApiOperation(value = "Returns a Specific User")
     @GetMapping("/{userId}")
-    fun getUser(@PathVariable userId: String) = userRepository.findById(userId).get()
+    fun getUser(@PathVariable userId: String) : ResponseEntity<Entity> {
+        userRepository.findById(userId).get()
+    }
 
     @ApiOperation(value = "Creates a New User")
     @PostMapping("/register")
-    fun registerUser(@RequestBody input: UserInputModel) : User{
+    fun registerUser(@RequestBody input: UserInputModel) : ResponseEntity<Entity>{
         val user = User(
                 username = input.username,
                 familyName = input.familyName,
@@ -40,7 +44,7 @@ class UserController {
 
     @ApiOperation(value = "Updates Specific User")
     @PutMapping
-    fun updateUser(@RequestBody input: UserInputModel) : User{
+    fun updateUser(@RequestBody input: UserInputModel) : ResponseEntity<Entity>{
         val currentUser = userRepository.findById(input.username)
         if(currentUser.get().username != getUser().username) throw AccessDeniedException("Forbidden")
         val user = User(
