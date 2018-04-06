@@ -12,6 +12,7 @@ import isel.leic.daw.checklistsAPI.model.Checklist
 import isel.leic.daw.checklistsAPI.model.Item
 import isel.leic.daw.checklistsAPI.model.State
 import isel.leic.daw.checklistsAPI.model.User
+import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.single.ItemOutputModel
 import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
 import isel.leic.daw.checklistsAPI.repo.ItemRepository
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 
 @RestController
 @RequestMapping("/api/checklists", produces = [Siren4J.JSON_MEDIATYPE])
@@ -41,7 +43,17 @@ class ChecklistController {
 
     @ApiOperation(value = "Returns the details of a specific Checklist")
     @GetMapping("/{checklistId}")
-    fun getChecklist(@PathVariable checklistId: Long) = checklistRepository.findById(checklistId).get()
+    fun getChecklist(@PathVariable checklistId: Long, principal: Principal): ResponseEntity<Entity> {
+        val checklist = checklistRepository.findById(checklistId).get()
+        val output = ChecklistOutputModel(
+                checklistId = checklist.checklistId,
+                name = checklist.checklistName,
+                description = checklist.checklistDescription,
+                completionDate = checklist.completionDate.toString(),
+                username = principal.name
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
+    }
 
     @ApiOperation(value = "Returns all Items of a specific Checklist")
     @GetMapping("/{checklistId}/items")
@@ -52,7 +64,7 @@ class ChecklistController {
 
     @ApiOperation(value = "Returns the details of a specific Item")
     @GetMapping("/{checklistId}/items/{itemId}")
-    fun getItemOfChecklist(@PathVariable checklistId: Long,@PathVariable itemId: Long): ResponseEntity<Entity> {
+    fun getItemOfChecklist(@PathVariable checklistId: Long, @PathVariable itemId: Long): ResponseEntity<Entity> {
         val checklist = checklistRepository.findById(checklistId).get()
         val item = itemRepository.findByChecklistAndItemId(checklist, itemId)
         val output = ItemOutputModel(

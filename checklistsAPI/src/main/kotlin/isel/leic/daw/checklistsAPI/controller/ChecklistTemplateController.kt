@@ -1,5 +1,8 @@
 package isel.leic.daw.checklistsAPI.controller
 
+import com.google.code.siren4j.Siren4J
+import com.google.code.siren4j.component.Entity
+import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.ApiOperation
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistTemplateCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemTemplateCollectionInputModel
@@ -7,17 +10,19 @@ import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistTemplateInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ItemTemplateInputModel
 import isel.leic.daw.checklistsAPI.model.*
+import isel.leic.daw.checklistsAPI.outputModel.single.ItemTemplateOutputModel
 import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
 import isel.leic.daw.checklistsAPI.repo.ChecklistTemplateRepository
 import isel.leic.daw.checklistsAPI.repo.ItemRepository
 import isel.leic.daw.checklistsAPI.repo.ItemTemplateRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.core.context.SecurityContextHolder
 
 @RestController
-@RequestMapping("/api/templates")
+@RequestMapping("/api/templates", produces = [Siren4J.JSON_MEDIATYPE])
 class ChecklistTemplateController {
 
     @Autowired
@@ -51,9 +56,17 @@ class ChecklistTemplateController {
 
     @ApiOperation(value = "Returns the details of a specific Item")
     @GetMapping("/{checklistTemplateId}/items/{itemId}")
-    fun getItemOfChecklistTemplate(@PathVariable checklistTemplateId: Long, @PathVariable itemId: Long): ItemTemplate {
+    fun getItemOfChecklistTemplate(@PathVariable checklistTemplateId: Long, @PathVariable itemId: Long): ResponseEntity<Entity> {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
-        return itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
+        val itemTemplate = itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
+        val output = ItemTemplateOutputModel(
+                name = itemTemplate.itemTemplateName!!,
+                description = itemTemplate.itemTemplateDescription!!,
+                state = itemTemplate.itemTemplateState.toString(),
+                itemTemplateId = itemTemplate.itemTemplateId,
+                templateId = checklistTemplateId
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Creates a new Template")
@@ -204,6 +217,8 @@ class ChecklistTemplateController {
     @ApiOperation(value = "Deletes specific Item from a Template")
     @DeleteMapping("{checklistTemplateId}/items/{itemTemplateId}")
     fun deleteSpecificItemTemplate(@PathVariable checklistTemplateId: Long, @PathVariable itemTemplateId: Long) = itemTemplateRepository.deleteByChecklistTemplateAndItemTemplateId(ChecklistTemplate(checklistTemplateId = checklistTemplateId), itemTemplateId)
+
+    //TODO: PATCHs
 
 }
 
