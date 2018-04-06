@@ -170,7 +170,6 @@ class ChecklistController {
         return itemRepository.save(item)
     }
 
-
     @ApiOperation(value = "Deletes all Checklists")
     @DeleteMapping
     fun deleteAllChecklists() = checklistRepository.deleteAll()
@@ -179,14 +178,12 @@ class ChecklistController {
     @DeleteMapping("/{checklistId}")
     fun deleteSpecificChecklist(@PathVariable checklistId: Long) = checklistRepository.deleteById(checklistId)
 
-    @ApiOperation(value = "Deletes all Items from a Checklist")
+    @ApiOperation(value = "Deletes all Items from a specific Checklist")
     @DeleteMapping("{checklistId}/items")
     fun deleteItem(@PathVariable checklistId: Long) = itemRepository.deleteByChecklist(Checklist(checklistId = checklistId))
 
     @ApiOperation(value = "Deletes specific Item from a Checklist")
     @DeleteMapping("{checklistId}/items/{itemId}")
     fun deleteSpecificItem(@PathVariable checklistId: Long, @PathVariable itemId: Long) = itemRepository.deleteByChecklistAndItemId(Checklist(checklistId = checklistId), itemId)
-
-    //TODO: PATCHs
 
 }

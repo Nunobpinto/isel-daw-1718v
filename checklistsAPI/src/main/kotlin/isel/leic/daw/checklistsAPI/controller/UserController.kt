@@ -1,5 +1,7 @@
 package isel.leic.daw.checklistsAPI.controller
 
+import com.google.code.siren4j.Siren4J
+import io.swagger.annotations.ApiOperation
 import isel.leic.daw.checklistsAPI.inputModel.single.UserInputModel
 import isel.leic.daw.checklistsAPI.model.User
 import isel.leic.daw.checklistsAPI.repo.UserRepository
@@ -9,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/users",produces = [Siren4J.JSON_MEDIATYPE])
 class UserController {
     @Autowired
     lateinit var userRepository: UserRepository
@@ -19,9 +21,11 @@ class UserController {
         return User(username = auth.name)
     }
 
+    @ApiOperation(value = "Returns a Specific User")
     @GetMapping("/{userId}")
     fun getUser(@PathVariable userId: String) = userRepository.findById(userId).get()
 
+    @ApiOperation(value = "Creates a New User")
     @PostMapping("/register")
     fun registerUser(@RequestBody input: UserInputModel) : User{
         val user = User(
@@ -34,7 +38,7 @@ class UserController {
         return userRepository.save(user)
     }
 
-    //TODO check if is correct to throw AccessDenied in this case
+    @ApiOperation(value = "Updates Specific User")
     @PutMapping
     fun updateUser(@RequestBody input: UserInputModel) : User{
         val currentUser = userRepository.findById(input.username)
@@ -50,4 +54,14 @@ class UserController {
         )
         return userRepository.save(user)
     }
+
+    @ApiOperation(value = "Deletes Specific User")
+    @DeleteMapping
+    fun deleteUser(@PathVariable username:String) : String{
+        if(username != getUser().username) throw AccessDeniedException("Forbidden")
+         userRepository.deleteById(username)
+        return "Removed user"
+    }
+
+
 }
