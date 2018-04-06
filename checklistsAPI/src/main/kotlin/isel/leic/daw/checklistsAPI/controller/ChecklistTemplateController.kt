@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.core.context.SecurityContextHolder
 
 @RestController
-@RequestMapping("/templates")
+@RequestMapping("/api/templates")
 class ChecklistTemplateController {
 
     @Autowired

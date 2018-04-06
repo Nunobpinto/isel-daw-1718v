@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/checklists", produces = [Siren4J.JSON_MEDIATYPE])
+@RequestMapping("/api/checklists", produces = [Siren4J.JSON_MEDIATYPE])
 class ChecklistController {
 
     @Autowired

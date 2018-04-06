@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
+import org.springframework.security.config.annotation.web.builders.WebSecurity
 
 @Configuration
 @EnableWebSecurity
@@ -19,7 +20,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     companion object {
         val REALM: String = "ChecklistsApiRealm"
-        private val PROTECTED_URI_PATTERN: String = "/**"
+        private val PROTECTED_URI_PATTERN: String = "/api/**"
     }
 
     @Autowired
@@ -29,11 +30,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                /*
                 .antMatchers(PROTECTED_URI_PATTERN).hasRole("USER")
-                 */
-                .antMatchers("/users/register/**").permitAll()
-                .anyRequest().authenticated()
                 .and().httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
@@ -59,4 +56,13 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     fun getBasicAuthEntryPoint(): AuthenticationEntryPoint? {
         return CustomBasicAuthenticationEntryPoint()
     }
+
+    override fun configure(web: WebSecurity) {
+        web.ignoring()
+                .antMatchers("/swagger-ui.html")
+                .antMatchers( "/swagger-resources")
+                .antMatchers( "/webjars/**")
+                .antMatchers("/users/register/**")
+    }
+
 }
