@@ -13,10 +13,10 @@ data class ItemTemplate(
         val itemTemplateId: Long = -1,
 
         @Column(name = "item_template_name")
-        val itemTemplateName: String? = null,
+        val itemTemplateName: String = "",
 
         @Column(name = "item_template_description")
-        val itemTemplateDescription: String? = null,
+        val itemTemplateDescription: String = "",
 
         @Enumerated(EnumType.STRING)
         @Column(name = "item_template_state")
@@ -25,7 +25,7 @@ data class ItemTemplate(
         @JsonIgnore
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "checklist_template_id", nullable = false)
-        val checklistTemplate: ChecklistTemplate? = null
+        val checklistTemplate: ChecklistTemplate? = ChecklistTemplate()
 ) : Serializable {
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true
