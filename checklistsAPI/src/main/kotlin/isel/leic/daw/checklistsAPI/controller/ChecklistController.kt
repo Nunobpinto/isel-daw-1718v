@@ -3,6 +3,7 @@ package isel.leic.daw.checklistsAPI.controller
 import com.google.code.siren4j.Siren4J
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
+import io.swagger.annotations.ApiOperation
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
@@ -34,18 +35,22 @@ class ChecklistController {
         return User(username = auth.name)
     }
 
+    @ApiOperation(value = "Returns all the Checklists")
     @GetMapping
     fun getAllChecklists() = checklistRepository.findAll()
 
+    @ApiOperation(value = "Returns the details of a specific Checklist")
     @GetMapping("/{checklistId}")
     fun getChecklist(@PathVariable checklistId: Long) = checklistRepository.findById(checklistId).get()
 
+    @ApiOperation(value = "Returns all Items of a specific Checklist")
     @GetMapping("/{checklistId}/items")
     fun getItemsOfChecklist(@PathVariable checklistId: Long): List<Item> {
         val checklist = checklistRepository.findById(checklistId).get()
         return itemRepository.findByChecklist(checklist)
     }
 
+    @ApiOperation(value = "Returns the details of a specific Item")
     @GetMapping("/{checklistId}/items/{itemId}")
     fun getItemOfChecklist(@PathVariable checklistId: Long,@PathVariable itemId: Long): ResponseEntity<Entity> {
         val checklist = checklistRepository.findById(checklistId).get()
@@ -60,6 +65,7 @@ class ChecklistController {
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
+    @ApiOperation(value = "Creates a new Checklist")
     @PostMapping
     fun addChecklist(@RequestBody input: ChecklistInputModel): Checklist {
         val checklist = Checklist(
@@ -72,6 +78,7 @@ class ChecklistController {
         return checklistRepository.save(checklist)
     }
 
+    @ApiOperation(value = "Creates a new Item on a given Checklist")
     @PostMapping("/{checklistId}/items")
     fun addItemToList(
             @PathVariable checklistId: Long,
@@ -87,6 +94,7 @@ class ChecklistController {
         return itemRepository.save(item)
     }
 
+    @ApiOperation(value = "Updates a set of Checklists")
     @PutMapping
     fun updateChecklists(@RequestBody input: ChecklistCollectionInputModel): List<Checklist> {
         val checklists = input
@@ -105,6 +113,7 @@ class ChecklistController {
         return checklistRepository.saveAll(checklists.asIterable()).toList()
     }
 
+    @ApiOperation(value = "Updates specific Checklist")
     @PutMapping("/{checklistId}")
     fun updateSpecificChecklist(
             @PathVariable checklistId: Long,
@@ -122,6 +131,7 @@ class ChecklistController {
         return checklistRepository.save(checklist)
     }
 
+    @ApiOperation(value = "Updates a set of Items from a Checklist")
     @PutMapping("/{checklistId}/items")
     fun updateItems(
             @PathVariable checklistId: Long,
@@ -142,6 +152,7 @@ class ChecklistController {
         return itemRepository.saveAll(items.asIterable()).toList()
     }
 
+    @ApiOperation(value = "Updates specific Iem from a Checklist")
     @PutMapping("/{checklistId}/items/{itemId}")
     fun updateItem(
             @PathVariable checklistId: Long,
@@ -160,15 +171,19 @@ class ChecklistController {
     }
 
 
+    @ApiOperation(value = "Deletes all Checklists")
     @DeleteMapping
     fun deleteAllChecklists() = checklistRepository.deleteAll()
 
+    @ApiOperation(value = "Deletes specific Checklist")
     @DeleteMapping("/{checklistId}")
     fun deleteSpecificChecklist(@PathVariable checklistId: Long) = checklistRepository.deleteById(checklistId)
 
+    @ApiOperation(value = "Deletes all Items from a Checklist")
     @DeleteMapping("{checklistId}/items")
     fun deleteItem(@PathVariable checklistId: Long) = itemRepository.deleteByChecklist(Checklist(checklistId = checklistId))
 
+    @ApiOperation(value = "Deletes specific Item from a Checklist")
     @DeleteMapping("{checklistId}/items/{itemId}")
     fun deleteSpecificItem(@PathVariable checklistId: Long, @PathVariable itemId: Long) = itemRepository.deleteByChecklistAndItemId(Checklist(checklistId = checklistId), itemId)
 
