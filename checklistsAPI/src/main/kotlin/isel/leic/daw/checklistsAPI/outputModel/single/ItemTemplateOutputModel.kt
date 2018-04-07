@@ -30,7 +30,10 @@ import isel.leic.daw.checklistsAPI.outputModel.collection.ItemTemplateCollection
                     fields = [
                         Siren4JActionField(name = "name", type = "text", required = true),
                         Siren4JActionField(name = "description", type = "text", required = true),
-                        Siren4JActionField(name = "state", type = "text", required = true),
+                        Siren4JActionField(name = "state", type = "text", required = true, options = [
+                            Siren4JFieldOption(value = "Uncompleted", optionDefault = true),
+                            Siren4JFieldOption(value = "Completed")
+                        ]),
                         Siren4JActionField(name = "id", type = "hidden", required = true)
                     ]
             )

@@ -11,29 +11,32 @@ import isel.leic.daw.checklistsAPI.outputModel.collection.ItemCollectionOutputMo
         suppressClassProperty = true,
         uri = "/api/checklists/{checklistId}/items/{itemId}",
         links = [
-                Siren4JLink(rel = ["next"], href = "/api/checklists/{checklistId}/items/{itemId}"),
-                Siren4JLink(rel = ["previous"], href = "/api/checklists/{checklistId}/items/{itemId}")
+            Siren4JLink(rel = ["next"], href = "/api/checklists/{checklistId}/items/{itemId}"),
+            Siren4JLink(rel = ["previous"], href = "/api/checklists/{checklistId}/items/{itemId}")
         ],
         actions = [
-                Siren4JAction(
-                        name = "delete-item",
-                        title = "Delete Item",
-                        method = Method.DELETE,
-                        href = "/api/checklists/{checklistId}/items/{itemId}"
-                ),
-                Siren4JAction(
-                        name = "update-item",
-                        title = "Update Item",
-                        method = Method.PUT,
-                        href = "/api/checklists/{checklistId}/items/{itemId}",
-                        type = "application/json",
-                        fields = [
-                                Siren4JActionField(name = "name", type = "text", required = true),
-                                Siren4JActionField(name = "description", type = "text", required = true),
-                                Siren4JActionField(name = "state", type = "text", required = true),
-                                Siren4JActionField(name = "id", type = "hidden", required = true)
-                        ]
-                )
+            Siren4JAction(
+                    name = "delete-item",
+                    title = "Delete Item",
+                    method = Method.DELETE,
+                    href = "/api/checklists/{checklistId}/items/{itemId}"
+            ),
+            Siren4JAction(
+                    name = "update-item",
+                    title = "Update Item",
+                    method = Method.PUT,
+                    href = "/api/checklists/{checklistId}/items/{itemId}",
+                    type = "application/json",
+                    fields = [
+                        Siren4JActionField(name = "name", type = "text", required = true),
+                        Siren4JActionField(name = "description", type = "text", required = true),
+                        Siren4JActionField(name = "state", type = "text", required = true, options = [
+                            Siren4JFieldOption(value = "Uncompleted", optionDefault = true),
+                            Siren4JFieldOption(value = "Completed")
+                        ]),
+                        Siren4JActionField(name = "id", type = "hidden", required = true)
+                    ]
+            )
         ]
 )
 data class ItemOutputModel(
@@ -50,7 +53,7 @@ data class ItemOutputModel(
         val items: ItemCollectionOutputModel = ItemCollectionOutputModel(),
         @Siren4JSubEntity(
                 uri = "/api/checklists/{parent.checklistId}",
-                rel=["about", "collection"],
+                rel = ["about", "collection"],
                 embeddedLink = true
         )
         val checklist: ChecklistOutputModel = ChecklistOutputModel()
