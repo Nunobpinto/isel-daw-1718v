@@ -9,25 +9,25 @@ import javax.persistence.*
 data class User(
         @Id
         @Column(name = "username")
-        val username: String,
+        val username: String = "",
 
         @Column(name = "family_name")
-        val familyName: String? = null,
+        val familyName: String = "",
 
         @Column(name = "given_name")
-        val givenName: String? = null,
+        val givenName: String = "",
 
         @Column(name = "email")
-        val email: String? = null,
+        val email: String = "",
 
         @Column(name = "password")
-        val password: String? = null,
+        val password: String = "",
 
         @JsonIgnore
         @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-        val checklistTemplates: MutableSet<ChecklistTemplate>? = null,
+        val checklistTemplates: MutableSet<ChecklistTemplate> = mutableSetOf(),
 
         @JsonIgnore
         @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-        val checklists: MutableSet<Checklist>? = null
+        val checklists: MutableSet<Checklist> = mutableSetOf()
 ) : Serializable

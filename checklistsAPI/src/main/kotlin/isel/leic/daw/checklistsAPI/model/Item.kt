@@ -16,10 +16,10 @@ data class Item(
         val itemId: Long = -1,
 
         @Column(name = "item_name")
-        val itemName: String? = null,
+        val itemName: String = "",
 
         @Column(name = "item_description")
-        val itemDescription: String? = null,
+        val itemDescription: String = "",
 
         @Enumerated(EnumType.STRING)
         @Column(name = "state")
@@ -28,7 +28,7 @@ data class Item(
         @JsonIgnore
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "checklist_id", nullable = false)
-        val checklist: Checklist? = null
+        val checklist: Checklist? = Checklist()
 ) : Serializable {
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true

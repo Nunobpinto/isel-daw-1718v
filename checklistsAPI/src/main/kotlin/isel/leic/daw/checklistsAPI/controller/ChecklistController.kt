@@ -14,6 +14,7 @@ import isel.leic.daw.checklistsAPI.model.Checklist
 import isel.leic.daw.checklistsAPI.model.Item
 import isel.leic.daw.checklistsAPI.model.State
 import isel.leic.daw.checklistsAPI.model.User
+import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.single.ItemOutputModel
 import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
 import isel.leic.daw.checklistsAPI.repo.ItemRepository
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 
 @RestController
 @RequestMapping("/api/checklists", produces = [Siren4J.JSON_MEDIATYPE])
@@ -46,15 +48,26 @@ class ChecklistController {
     @GetMapping("/{checklistId}")
     fun getChecklist(
             @ApiParam(value = "The identifier of the desire Checklist ", required = true)
-            @PathVariable checklistId: Long
-    ) = checklistRepository.findById(checklistId).get()
+            @PathVariable checklistId: Long,
+            principal: Principal
+    ) : ResponseEntity<Entity> {
+        val checklist = checklistRepository.findById(checklistId).get()
+        val output = ChecklistOutputModel(
+                checklistId = checklist.checklistId,
+                name = checklist.checklistName,
+                description = checklist.checklistDescription,
+                completionDate = checklist.completionDate.toString(),
+                username = principal.name
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
+    }
 
     @ApiOperation(value = "Returns all Items of a specific Checklist")
     @GetMapping("/{checklistId}/items")
     fun getItemsOfChecklist(
             @ApiParam(value = "The identifier of the Checklist where the Items belong", required = true)
             @PathVariable checklistId: Long
-    ): List<Item> {
+    ): ResponseEntity<Entity> {
         val checklist = checklistRepository.findById(checklistId).get()
         return itemRepository.findByChecklist(checklist)
     }
@@ -72,8 +85,8 @@ class ChecklistController {
         val output = ItemOutputModel(
                 checklistId = checklistId,
                 itemId = item.itemId,
-                name = item.itemName!!,
-                description = item.itemDescription!!,
+                name = item.itemName,
+                description = item.itemDescription,
                 state = item.itemState.name
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -83,16 +96,25 @@ class ChecklistController {
     @PostMapping
     fun addChecklist(
             @ApiParam(value = "Input that represents the Checklist to be created", required = true)
-            @RequestBody input: ChecklistInputModel
-    ): Checklist {
-        val checklist = Checklist(
+            @RequestBody input: ChecklistInputModel,
+            principal: Principal
+    ): ResponseEntity<Entity> {
+        var checklist = Checklist(
                 checklistName = input.checklistName,
                 checklistDescription = input.checklistDescription,
                 checklistId = input.checklistId,
                 completionDate = input.completionDate,
                 user = getUser()
         )
-        return checklistRepository.save(checklist)
+        checklist = checklistRepository.save(checklist)
+        val output = ChecklistOutputModel(
+                checklistId = checklist.checklistId,
+                name = checklist.checklistName,
+                description = checklist.checklistDescription,
+                completionDate = checklist.completionDate.toString(),
+                username = principal.name
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Creates a new Item on a given Checklist")
@@ -102,15 +124,22 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             @ApiParam(value = "Input that represents the Item to be created", required = true)
             @RequestBody input: ItemInputModel
-    ): Item {
+    ): ResponseEntity<Entity>  {
         val checklist = checklistRepository.findById(checklistId).get()
-        val item = Item(
+        var item = Item(
                 itemName = input.itemName,
                 itemDescription = input.itemDescription,
                 itemState = State.valueOf(input.itemState),
                 checklist = checklist
         )
-        return itemRepository.save(item)
+        item = itemRepository.save(item)
+        val output = ItemOutputModel(
+                checklistId = checklist.checklistId,
+                name = item.itemName,
+                description = item.itemDescription,
+                state = item.itemState.toString()
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Updates a set of Checklists")
@@ -118,7 +147,7 @@ class ChecklistController {
     fun updateChecklists(
             @ApiParam(value = "Input that represents a set of Checklists to be updated", required = true)
             @RequestBody input: ChecklistCollectionInputModel
-    ): List<Checklist> {
+    ): ResponseEntity<Entity>{
         val checklists = input
                 .checklists
                 .map {
@@ -142,8 +171,8 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             @ApiParam(value = "Input that represents the Checklist updated", required = true)
             @RequestBody input: ChecklistInputModel
-    ): Checklist {
-        val checklist = Checklist(
+    ): ResponseEntity<Entity> {
+        var checklist = Checklist(
                 checklistName = input.checklistName,
                 checklistId = checklistId,
                 checklistDescription = input.checklistDescription,
@@ -152,7 +181,15 @@ class ChecklistController {
                         checklistRepository.findById(checklistId).get()
                 ).toMutableSet()
         )
-        return checklistRepository.save(checklist)
+        checklist = checklistRepository.save(checklist)
+        val output = ChecklistOutputModel(
+                checklistId = checklist.checklistId,
+                name = checklist.checklistName,
+                description = checklist.checklistDescription,
+                completionDate = checklist.completionDate.toString(),
+                username = principal.name
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Updates a set of Items from a Checklist")
@@ -162,7 +199,7 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
             @RequestBody input: ItemCollectionInputModel
-    ): List<Item> {
+    ): ResponseEntity<Entity>{
         val checklist = checklistRepository.findById(checklistId).get()
         val items = input
                 .items
@@ -187,16 +224,23 @@ class ChecklistController {
             @PathVariable itemId: Long,
             @ApiParam(value = "Input that represents the Item updated", required = true)
             @RequestBody input: ItemInputModel
-    ): Item {
+    ): ResponseEntity<Entity> {
         val checklist = checklistRepository.findById(checklistId).get()
-        val item = Item(
+        var item = Item(
                 itemName = input.itemName,
                 itemDescription = input.itemDescription,
                 itemState = State.valueOf(input.itemState),
                 checklist = checklist,
                 itemId = itemId
         )
-        return itemRepository.save(item)
+        item = itemRepository.save(item)
+        val output = ItemOutputModel(
+                checklistId = checklist.checklistId,
+                name = item.itemName,
+                description = item.itemDescription,
+                state = item.itemState.toString()
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Deletes all Checklists")

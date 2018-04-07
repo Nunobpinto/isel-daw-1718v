@@ -1,6 +1,9 @@
 package isel.leic.daw.checklistsAPI.controller
 
 import io.swagger.annotations.Api
+import com.google.code.siren4j.Siren4J
+import com.google.code.siren4j.component.Entity
+import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistTemplateCollectionInputModel
@@ -9,17 +12,20 @@ import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistTemplateInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ItemTemplateInputModel
 import isel.leic.daw.checklistsAPI.model.*
+import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistTemplateOutputModel
+import isel.leic.daw.checklistsAPI.outputModel.single.ItemTemplateOutputModel
 import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
 import isel.leic.daw.checklistsAPI.repo.ChecklistTemplateRepository
 import isel.leic.daw.checklistsAPI.repo.ItemRepository
 import isel.leic.daw.checklistsAPI.repo.ItemTemplateRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.core.context.SecurityContextHolder
 
 @RestController
-@RequestMapping("/api/templates")
+@RequestMapping("/api/templates", produces = [Siren4J.JSON_MEDIATYPE])
 @Api(description = "Operations pertaining to Templates of Checklists")
 class ChecklistTemplateController {
 
@@ -46,14 +52,24 @@ class ChecklistTemplateController {
     fun getTemplate(
             @ApiParam(value = "The identifier of the desire Template ", required = true)
             @PathVariable checklistTemplateId: Long
-    ) = checklistTemplateRepository.findById(checklistTemplateId).get()
+    ) : ResponseEntity<Entity> {
+        val template = checklistTemplateRepository.findById(checklistTemplateId).get()
+        val output = ChecklistTemplateOutputModel(
+                checklistId = checklist.checklistId,
+                name = checklist.checklistName,
+                description = checklist.checklistDescription,
+                completionDate = checklist.completionDate.toString(),
+                username = principal.name
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
+    }
 
     @ApiOperation(value = "Returns all Items of a specific Template")
     @GetMapping("/{checklistTemplateId}/items")
     fun getItemsOfChecklistTemplate(
             @ApiParam(value = "The identifier of the Template where the Items belong", required = true)
             @PathVariable checklistTemplateId: Long
-    ): List<ItemTemplate> {
+    ): ResponseEntity<Entity> {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
         return itemTemplateRepository.findByChecklistTemplate(checklistTemplate)
     }
@@ -65,9 +81,17 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "The identifier of the Item", required = true)
             @PathVariable itemId: Long
-    ): ItemTemplate {
+    ): ResponseEntity<Entity> {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
-        return itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
+        val itemTemplate = itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
+        val output = ItemTemplateOutputModel(
+                name = itemTemplate.itemTemplateName!!,
+                description = itemTemplate.itemTemplateDescription!!,
+                state = itemTemplate.itemTemplateState.toString(),
+                itemTemplateId = itemTemplate.itemTemplateId,
+                templateId = checklistTemplateId
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Creates a new Template")
@@ -75,7 +99,7 @@ class ChecklistTemplateController {
     fun addChecklistTemplate(
             @ApiParam(value = "Input that represents the Template to be created", required = true)
             @RequestBody input: ChecklistTemplateInputModel
-    ): ChecklistTemplate {
+    ): ResponseEntity<Entity> {
         val template = ChecklistTemplate(
                 checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateDescription = input.checklistTemplateDescription,
@@ -91,7 +115,7 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Checklist to be created", required = true)
             @RequestBody input: ChecklistInputModel
-    ): Checklist {
+    ): ResponseEntity<Entity> {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         var checklist = Checklist(
                 checklistName = input.checklistName,
@@ -119,7 +143,7 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Item to be created", required = true)
             @RequestBody input: ItemTemplateInputModel
-    ): ItemTemplate {
+    ): ResponseEntity<Entity> {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,
@@ -135,7 +159,7 @@ class ChecklistTemplateController {
     fun updateChecklistTemplates(
             @ApiParam(value = "Input that represents a set of Templates to be updated", required = true)
             @RequestBody input: ChecklistTemplateCollectionInputModel
-    ): List<ChecklistTemplate> {
+    ): ResponseEntity<Entity> {
         val templates = input
                 .checklists
                 .map {
@@ -159,7 +183,7 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Template updated", required = true)
             @RequestBody input: ChecklistTemplateInputModel
-    ): ChecklistTemplate {
+    ): ResponseEntity<Entity> {
         val template = ChecklistTemplate(
                 checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateId = checklistTemplateId,
@@ -179,7 +203,7 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
             @RequestBody input: ItemTemplateCollectionInputModel
-    ): List<ItemTemplate> {
+    ): ResponseEntity<Entity> {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplates = input
                 .itemTemplates
@@ -204,7 +228,7 @@ class ChecklistTemplateController {
             @PathVariable itemId: Long,
             @ApiParam(value = "Input that represents the Item updated", required = true)
             @RequestBody input: ItemTemplateInputModel
-    ): ItemTemplate {
+    ): ResponseEntity<Entity> {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,
