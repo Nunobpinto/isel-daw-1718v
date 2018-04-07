@@ -14,6 +14,8 @@ import isel.leic.daw.checklistsAPI.model.Checklist
 import isel.leic.daw.checklistsAPI.model.Item
 import isel.leic.daw.checklistsAPI.model.State
 import isel.leic.daw.checklistsAPI.model.User
+import isel.leic.daw.checklistsAPI.outputModel.collection.ChecklistCollectionOutputModel
+import isel.leic.daw.checklistsAPI.outputModel.collection.ItemCollectionOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.single.ItemOutputModel
 import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
@@ -38,7 +40,23 @@ class ChecklistController {
 
     @ApiOperation(value = "Returns all Checklists")
     @GetMapping
-    fun getAllChecklists(principal: Principal) = checklistRepository.findByUser(User(username = principal.name))
+    fun getAllChecklists(
+            principal: Principal
+    ): ResponseEntity<Entity> {
+        val checklists = checklistRepository.findByUser(User(username = principal.name))
+        val output = ChecklistCollectionOutputModel(
+                checklists.map {
+                    ChecklistOutputModel(
+                            checklistId = it.checklistId,
+                            name = it.checklistName,
+                            description = it.checklistDescription,
+                            completionDate = it.completionDate.toString(),
+                            username = principal.name
+                    )
+                }
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
+    }
 
     @ApiOperation(value = "Returns the details of a specific Checklist")
     @GetMapping("/{checklistId}")
@@ -65,10 +83,23 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist where the Items belong", required = true)
             @PathVariable checklistId: Long,
             principal: Principal
-    ): List<Item> {
+    ): ResponseEntity<Entity> {
         val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-        return itemRepository.findByChecklist(checklist)
+        val items = itemRepository.findByChecklist(checklist)
+        val output = ItemCollectionOutputModel(
+                checklistId,
+                items.map {
+                    ItemOutputModel(
+                            itemId = it.itemId,
+                            name = it.itemName,
+                            description = it.itemDescription,
+                            state = it.itemState.toString(),
+                            checklistId = checklistId
+                    )
+                }
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Returns the details of a specific Item")
@@ -151,7 +182,7 @@ class ChecklistController {
             @ApiParam(value = "Input that represents a set of Checklists to be updated", required = true)
             @RequestBody input: ChecklistCollectionInputModel,
             principal: Principal
-    ): List<Checklist> {
+    ): ResponseEntity<Entity> {
         val checklists = input.checklists
                 .map {
                     Checklist(
@@ -165,7 +196,19 @@ class ChecklistController {
                             ).toMutableSet()
                     )
                 }
-        return checklistRepository.saveAll(checklists.asIterable()).toList()
+        checklistRepository.saveAll(checklists.asIterable())
+        val output = ChecklistCollectionOutputModel(
+                checklists.map {
+                    ChecklistOutputModel(
+                            checklistId = it.checklistId,
+                            name = it.checklistName,
+                            description = it.checklistDescription,
+                            completionDate = it.completionDate.toString(),
+                            username = principal.name
+                    )
+                }
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Updates specific Checklist")
@@ -206,7 +249,7 @@ class ChecklistController {
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
             @RequestBody input: ItemCollectionInputModel,
             principal: Principal
-    ): List<Item> {
+    ): ResponseEntity<Entity> {
         val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val items = input
@@ -220,7 +263,19 @@ class ChecklistController {
                             itemId = it.itemId
                     )
                 }
-        return itemRepository.saveAll(items.asIterable()).toList()
+        val output = ItemCollectionOutputModel(
+                checklistId,
+                items.map {
+                    ItemOutputModel(
+                            itemId = it.itemId,
+                            name = it.itemName,
+                            description = it.itemDescription,
+                            state = it.itemState.toString(),
+                            checklistId = checklistId
+                    )
+                }
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Updates specific Item from a Checklist")
@@ -284,7 +339,7 @@ class ChecklistController {
             principal: Principal
     ) = itemRepository.deleteByChecklistAndItemId(
             checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
-            .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                    .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
             , itemId
     )
 
