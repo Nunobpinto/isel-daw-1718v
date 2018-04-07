@@ -20,6 +20,7 @@ import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
 import isel.leic.daw.checklistsAPI.repo.ItemRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
@@ -35,14 +36,9 @@ class ChecklistController {
     @Autowired
     lateinit var itemRepository: ItemRepository
 
-    fun getUser(): User {
-        val auth = SecurityContextHolder.getContext().authentication
-        return User(username = auth.name)
-    }
-
     @ApiOperation(value = "Returns all Checklists")
     @GetMapping
-    fun getAllChecklists() = checklistRepository.findAll()
+    fun getAllChecklists(principal: Principal) = checklistRepository.findByUser(User(username = principal.name))
 
     @ApiOperation(value = "Returns the details of a specific Checklist")
     @GetMapping("/{checklistId}")
@@ -50,8 +46,9 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the desire Checklist ", required = true)
             @PathVariable checklistId: Long,
             principal: Principal
-    ) : ResponseEntity<Entity> {
-        val checklist = checklistRepository.findById(checklistId).get()
+    ): ResponseEntity<Entity> {
+        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val output = ChecklistOutputModel(
                 checklistId = checklist.checklistId,
                 name = checklist.checklistName,
@@ -66,9 +63,11 @@ class ChecklistController {
     @GetMapping("/{checklistId}/items")
     fun getItemsOfChecklist(
             @ApiParam(value = "The identifier of the Checklist where the Items belong", required = true)
-            @PathVariable checklistId: Long
+            @PathVariable checklistId: Long,
+            principal: Principal
     ): List<Item> {
-        val checklist = checklistRepository.findById(checklistId).get()
+        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         return itemRepository.findByChecklist(checklist)
     }
 
@@ -78,9 +77,11 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist where the Item belongs", required = true)
             @PathVariable checklistId: Long,
             @ApiParam(value = "The identifier of the Item", required = true)
-            @PathVariable itemId: Long
+            @PathVariable itemId: Long,
+            principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findById(checklistId).get()
+        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val item = itemRepository.findByChecklistAndItemId(checklist, itemId)
         val output = ItemOutputModel(
                 checklistId = checklistId,
@@ -104,7 +105,7 @@ class ChecklistController {
                 checklistDescription = input.checklistDescription,
                 checklistId = input.checklistId,
                 completionDate = input.completionDate,
-                user = getUser()
+                user = User(username = principal.name)
         )
         checklist = checklistRepository.save(checklist)
         val output = ChecklistOutputModel(
@@ -123,9 +124,11 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist for which a new Item will be created", required = true)
             @PathVariable checklistId: Long,
             @ApiParam(value = "Input that represents the Item to be created", required = true)
-            @RequestBody input: ItemInputModel
-    ): ResponseEntity<Entity>  {
-        val checklist = checklistRepository.findById(checklistId).get()
+            @RequestBody input: ItemInputModel,
+            principal: Principal
+    ): ResponseEntity<Entity> {
+        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         var item = Item(
                 itemName = input.itemName,
                 itemDescription = input.itemDescription,
@@ -146,18 +149,19 @@ class ChecklistController {
     @PutMapping
     fun updateChecklists(
             @ApiParam(value = "Input that represents a set of Checklists to be updated", required = true)
-            @RequestBody input: ChecklistCollectionInputModel
+            @RequestBody input: ChecklistCollectionInputModel,
+            principal: Principal
     ): List<Checklist> {
-        val checklists = input
-                .checklists
+        val checklists = input.checklists
                 .map {
                     Checklist(
                             checklistName = it.checklistName,
                             checklistDescription = it.checklistDescription,
                             checklistId = it.checklistId,
-                            user = getUser(),
+                            user = User(username = principal.name),
                             items = itemRepository.findByChecklist(
-                                    checklistRepository.findById(it.checklistId).get()
+                                    checklistRepository.findByChecklistIdAndUser(it.checklistId, User(username = principal.name))
+                                            .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
                             ).toMutableSet()
                     )
                 }
@@ -177,9 +181,10 @@ class ChecklistController {
                 checklistName = input.checklistName,
                 checklistId = checklistId,
                 checklistDescription = input.checklistDescription,
-                user = getUser(),
+                user = User(username = principal.name),
                 items = itemRepository.findByChecklist(
-                        checklistRepository.findById(checklistId).get()
+                        checklistRepository.findByChecklistIdAndUser(input.checklistId, User(username = principal.name))
+                                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
                 ).toMutableSet()
         )
         checklist = checklistRepository.save(checklist)
@@ -199,9 +204,11 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist for wich the Items will be updated", required = true)
             @PathVariable checklistId: Long,
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
-            @RequestBody input: ItemCollectionInputModel
-    ): List<Item>{
-        val checklist = checklistRepository.findById(checklistId).get()
+            @RequestBody input: ItemCollectionInputModel,
+            principal: Principal
+    ): List<Item> {
+        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val items = input
                 .items
                 .map {
@@ -224,9 +231,11 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Item to be updated", required = true)
             @PathVariable itemId: Long,
             @ApiParam(value = "Input that represents the Item updated", required = true)
-            @RequestBody input: ItemInputModel
+            @RequestBody input: ItemInputModel,
+            principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findById(checklistId).get()
+        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         var item = Item(
                 itemName = input.itemName,
                 itemDescription = input.itemDescription,
@@ -246,21 +255,24 @@ class ChecklistController {
 
     @ApiOperation(value = "Deletes all Checklists")
     @DeleteMapping
-    fun deleteAllChecklists() = checklistRepository.deleteAll()
+    fun deleteAllChecklists(principal: Principal) = checklistRepository.deleteByUser(User(username = principal.name))
 
     @ApiOperation(value = "Deletes specific Checklist")
     @DeleteMapping("/{checklistId}")
     fun deleteSpecificChecklist(
             @ApiParam(value = "The identifier of the Checklist to be deleted", required = true)
-            @PathVariable checklistId: Long
-    ) = checklistRepository.deleteById(checklistId)
+            @PathVariable checklistId: Long,
+            principal: Principal
+    ) = checklistRepository.deleteByChecklistIdAndUser(checklistId, User(username = principal.name))
 
     @ApiOperation(value = "Deletes all Items from a specific Checklist")
     @DeleteMapping("{checklistId}/items")
     fun deleteItem(
-            @ApiParam(value = "The identifier of the Checklist from wich the Items will be deleted", required = true)
-            @PathVariable checklistId: Long
-    ) = itemRepository.deleteByChecklist(Checklist(checklistId = checklistId))
+            @ApiParam(value = "The identifier of the Checklist from which the Items will be deleted", required = true)
+            @PathVariable checklistId: Long,
+            principal: Principal
+    ) = itemRepository.deleteByChecklist(checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+            .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") }))
 
     @ApiOperation(value = "Deletes specific Item from a Checklist")
     @DeleteMapping("{checklistId}/items/{itemId}")
@@ -268,7 +280,12 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist from wich the Item will be deleted", required = true)
             @PathVariable checklistId: Long,
             @ApiParam(value = "The identifier of the Item to be deleted", required = true)
-            @PathVariable itemId: Long
-    ) = itemRepository.deleteByChecklistAndItemId(Checklist(checklistId = checklistId), itemId)
+            @PathVariable itemId: Long,
+            principal: Principal
+    ) = itemRepository.deleteByChecklistAndItemId(
+            checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+            .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+            , itemId
+    )
 
 }

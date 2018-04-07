@@ -6,8 +6,9 @@ import com.google.code.siren4j.resource.CollectionResource
 import isel.leic.daw.checklistsAPI.outputModel.single.ItemTemplateOutputModel
 
 @Siren4JEntity(name = "items")
-class ItemTemplateCollectionOutputModel(itemTemplates: Collection<ItemTemplateOutputModel>)
-    : CollectionResource<ItemTemplateOutputModel>() {
+class ItemTemplateCollectionOutputModel(
+        itemTemplates: Collection<ItemTemplateOutputModel> = CollectionResource()
+) : CollectionResource<ItemTemplateOutputModel>() {
     init {
         this.addAll(itemTemplates)
     }

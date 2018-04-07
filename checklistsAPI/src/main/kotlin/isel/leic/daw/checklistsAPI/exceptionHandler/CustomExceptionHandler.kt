@@ -45,7 +45,7 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(
                 ErrorOutputModel(
                         title = "Forbidden",
-                        detail = "No permission granted to access the resource",
+                        detail = ex.message ?: "No permission granted to access the resource",
                         status = 403
                 ),
                 httpHeaders,

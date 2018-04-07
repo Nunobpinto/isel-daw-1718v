@@ -20,6 +20,7 @@ import isel.leic.daw.checklistsAPI.repo.ItemRepository
 import isel.leic.daw.checklistsAPI.repo.ItemTemplateRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.core.context.SecurityContextHolder
@@ -39,14 +40,9 @@ class ChecklistTemplateController {
     @Autowired
     lateinit var itemRepository: ItemRepository
 
-    fun getUser(): User {
-        val auth = SecurityContextHolder.getContext().authentication
-        return User(username = auth.name)
-    }
-
     @ApiOperation(value = "Returns all Templates")
     @GetMapping
-    fun getAllTemplates() = checklistTemplateRepository.findAll()
+    fun getAllTemplates(principal: Principal) = checklistTemplateRepository.findByUser(User(username = principal.name))
 
     @ApiOperation(value = "Returns the details of a specific Template")
     @GetMapping("/{checklistTemplateId}")
@@ -54,8 +50,9 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the desire Template ", required = true)
             @PathVariable checklistTemplateId: Long,
             principal: Principal
-    ) : ResponseEntity<Entity> {
-        val template = checklistTemplateRepository.findById(checklistTemplateId).get()
+    ): ResponseEntity<Entity> {
+        val template = checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
         val output = ChecklistTemplateOutputModel(
                 templateId = checklistTemplateId,
                 name = template.checklistTemplateName,
@@ -69,10 +66,12 @@ class ChecklistTemplateController {
     @GetMapping("/{checklistTemplateId}/items")
     fun getItemsOfChecklistTemplate(
             @ApiParam(value = "The identifier of the Template where the Items belong", required = true)
-            @PathVariable checklistTemplateId: Long
+            @PathVariable checklistTemplateId: Long,
+            principal: Principal
     ): List<ItemTemplate> {
-        val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
-        return itemTemplateRepository.findByChecklistTemplate(checklistTemplate)
+        val template = checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+        return itemTemplateRepository.findByChecklistTemplate(template)
     }
 
     @ApiOperation(value = "Returns the details of a specific Item")
@@ -81,10 +80,12 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template where the Item belongs", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "The identifier of the Item", required = true)
-            @PathVariable itemId: Long
+            @PathVariable itemId: Long,
+            principal: Principal
     ): ResponseEntity<Entity> {
-        val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
-        val itemTemplate = itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
+        val template = checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+        val itemTemplate = itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(template, itemId)
         val output = ItemTemplateOutputModel(
                 name = itemTemplate.itemTemplateName,
                 description = itemTemplate.itemTemplateDescription,
@@ -99,12 +100,13 @@ class ChecklistTemplateController {
     @PostMapping
     fun addChecklistTemplate(
             @ApiParam(value = "Input that represents the Template to be created", required = true)
-            @RequestBody input: ChecklistTemplateInputModel
+            @RequestBody input: ChecklistTemplateInputModel,
+            principal: Principal
     ): ChecklistTemplate {
         val template = ChecklistTemplate(
                 checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateDescription = input.checklistTemplateDescription,
-                user = getUser()
+                user = User(username = principal.name)
         )
         return checklistTemplateRepository.save(template)
     }
@@ -115,15 +117,17 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template from which the Checklist will be created ", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Checklist to be created", required = true)
-            @RequestBody input: ChecklistInputModel
+            @RequestBody input: ChecklistInputModel,
+            principal: Principal
     ): Checklist {
-        val template = checklistTemplateRepository.findById(checklistTemplateId).get()
+        val template = checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
         var checklist = Checklist(
                 checklistName = input.checklistName,
                 completionDate = input.completionDate,
                 checklistDescription = input.checklistDescription,
                 template = template,
-                user = getUser()
+                user = User(username = principal.name)
         )
         checklist = checklistRepository.save(checklist)
         val items = itemTemplateRepository
@@ -144,9 +148,11 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template for which a new Item will be created", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Item to be created", required = true)
-            @RequestBody input: ItemTemplateInputModel
+            @RequestBody input: ItemTemplateInputModel,
+            principal: Principal
     ): ItemTemplate {
-        val template = checklistTemplateRepository.findById(checklistTemplateId).get()
+        val template = checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,
                 itemTemplateDescription = input.itemTemplateDescription,
@@ -160,7 +166,8 @@ class ChecklistTemplateController {
     @PutMapping
     fun updateChecklistTemplates(
             @ApiParam(value = "Input that represents a set of Templates to be updated", required = true)
-            @RequestBody input: ChecklistTemplateCollectionInputModel
+            @RequestBody input: ChecklistTemplateCollectionInputModel,
+            principal: Principal
     ): List<ChecklistTemplate> {
         val templates = input
                 .checklists
@@ -169,9 +176,10 @@ class ChecklistTemplateController {
                             checklistTemplateName = it.checklistTemplateName,
                             checklistTemplateId = it.checklistTemplateId,
                             checklistTemplateDescription = it.checklistTemplateDescription,
-                            user = getUser(),
+                            user = User(username = principal.name),
                             items = itemTemplateRepository.findByChecklistTemplate(
-                                    checklistTemplateRepository.findById(it.checklistTemplateId).get()
+                                    checklistTemplateRepository.findByChecklistTemplateIdAndUser(it.checklistTemplateId, User(username = principal.name))
+                                            .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
                             ).toMutableSet()
                     )
                 }
@@ -184,15 +192,17 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template to be updated", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Template updated", required = true)
-            @RequestBody input: ChecklistTemplateInputModel
+            @RequestBody input: ChecklistTemplateInputModel,
+            principal: Principal
     ): ChecklistTemplate {
         val template = ChecklistTemplate(
                 checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateId = checklistTemplateId,
                 checklistTemplateDescription = input.checklistTemplateDescription,
-                user = getUser(),
+                user = User(username = principal.name),
                 items = itemTemplateRepository.findByChecklistTemplate(
-                        checklistTemplateRepository.findById(checklistTemplateId).get()
+                        checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
                 ).toMutableSet()
         )
         return checklistTemplateRepository.save(template)
@@ -204,9 +214,11 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template for wich the Items will be updated", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
-            @RequestBody input: ItemTemplateCollectionInputModel
+            @RequestBody input: ItemTemplateCollectionInputModel,
+            principal: Principal
     ): List<ItemTemplate> {
-        val template = checklistTemplateRepository.findById(checklistTemplateId).get()
+        val template = checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
         val itemTemplates = input
                 .itemTemplates
                 .map {
@@ -229,9 +241,11 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Item to be updated", required = true)
             @PathVariable itemId: Long,
             @ApiParam(value = "Input that represents the Item updated", required = true)
-            @RequestBody input: ItemTemplateInputModel
+            @RequestBody input: ItemTemplateInputModel,
+            principal: Principal
     ): ItemTemplate {
-        val template = checklistTemplateRepository.findById(checklistTemplateId).get()
+        val template = checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,
                 itemTemplateDescription = input.itemTemplateDescription,
@@ -244,15 +258,19 @@ class ChecklistTemplateController {
 
     @ApiOperation(value = "Deletes all Templates")
     @DeleteMapping
-    fun deleteAllTemplates() = checklistTemplateRepository.deleteAll()
+    fun deleteAllTemplates(principal: Principal) = checklistTemplateRepository.deleteByUser(User(username = principal.name))
 
     @ApiOperation(value = "Deletes specific Template")
     @DeleteMapping("/{checklistTemplateId}")
     fun deleteSpecificTemplate(
             @ApiParam(value = "The identifier of the Template to be deleted", required = true)
-            @PathVariable checklistTemplateId: Long
+            @PathVariable checklistTemplateId: Long,
+            principal: Principal
     ) {
-        val checklists: List<Checklist> = checklistRepository.findByTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
+        val checklists: List<Checklist> = checklistRepository.findByTemplate(
+                checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                        .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+        )
         if (checklists.isNotEmpty()) {
             checklists.forEach { it.template = null }
             checklistRepository.saveAll(checklists)
@@ -264,8 +282,11 @@ class ChecklistTemplateController {
     @DeleteMapping("{checklistTemplateId}/items")
     fun deleteItemTemplate(
             @ApiParam(value = "The identifier of the Template from wich the Items will be deleted", required = true)
-            @PathVariable checklistTemplateId: Long
-    ) = itemTemplateRepository.deleteByChecklistTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
+            @PathVariable checklistTemplateId: Long,
+            principal: Principal
+    ) = itemTemplateRepository.deleteByChecklistTemplate(checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+            .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+    )
 
     @ApiOperation(value = "Deletes specific Item from a Template")
     @DeleteMapping("{checklistTemplateId}/items/{itemTemplateId}")
@@ -273,8 +294,12 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template from wich the Item will be deleted", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "The identifier of the Item to be deleted", required = true)
-            @PathVariable itemTemplateId: Long
-    ) = itemTemplateRepository.deleteByChecklistTemplateAndItemTemplateId(ChecklistTemplate(checklistTemplateId = checklistTemplateId), itemTemplateId)
+            @PathVariable itemTemplateId: Long,
+            principal: Principal
+    ) = itemTemplateRepository.deleteByChecklistTemplateAndItemTemplateId(
+            checklistTemplateRepository.findByChecklistTemplateIdAndUser(checklistTemplateId, User(username = principal.name))
+                    .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+            , itemTemplateId)
 
 }
 
