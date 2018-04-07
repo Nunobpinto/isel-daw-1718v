@@ -1,6 +1,8 @@
 package isel.leic.daw.checklistsAPI.controller
 
+import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistTemplateCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemTemplateCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
@@ -18,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 @RestController
 @RequestMapping("/api/templates")
+@Api(description = "Operations pertaining to Templates of Checklists")
 class ChecklistTemplateController {
 
     @Autowired
@@ -34,31 +37,45 @@ class ChecklistTemplateController {
         return User(username = auth.name)
     }
 
-    @ApiOperation(value = "Returns all the Templates")
+    @ApiOperation(value = "Returns all Templates")
     @GetMapping
     fun getAllTemplates() = checklistTemplateRepository.findAll()
 
     @ApiOperation(value = "Returns the details of a specific Template")
     @GetMapping("/{checklistTemplateId}")
-    fun getTemplate(@PathVariable checklistTemplateId: Long) = checklistTemplateRepository.findById(checklistTemplateId).get()
+    fun getTemplate(
+            @ApiParam(value = "The identifier of the desire Template ", required = true)
+            @PathVariable checklistTemplateId: Long
+    ) = checklistTemplateRepository.findById(checklistTemplateId).get()
 
     @ApiOperation(value = "Returns all Items of a specific Template")
     @GetMapping("/{checklistTemplateId}/items")
-    fun getItemsOfChecklistTemplate(@PathVariable checklistTemplateId: Long): List<ItemTemplate> {
+    fun getItemsOfChecklistTemplate(
+            @ApiParam(value = "The identifier of the Template where the Items belong", required = true)
+            @PathVariable checklistTemplateId: Long
+    ): List<ItemTemplate> {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
         return itemTemplateRepository.findByChecklistTemplate(checklistTemplate)
     }
 
     @ApiOperation(value = "Returns the details of a specific Item")
     @GetMapping("/{checklistTemplateId}/items/{itemId}")
-    fun getItemOfChecklistTemplate(@PathVariable checklistTemplateId: Long, @PathVariable itemId: Long): ItemTemplate {
+    fun getItemOfChecklistTemplate(
+            @ApiParam(value = "The identifier of the Template where the Item belongs", required = true)
+            @PathVariable checklistTemplateId: Long,
+            @ApiParam(value = "The identifier of the Item", required = true)
+            @PathVariable itemId: Long
+    ): ItemTemplate {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
         return itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
     }
 
     @ApiOperation(value = "Creates a new Template")
     @PostMapping
-    fun addChecklistTemplate(@RequestBody input: ChecklistTemplateInputModel): ChecklistTemplate {
+    fun addChecklistTemplate(
+            @ApiParam(value = "Input that represents the Template to be created", required = true)
+            @RequestBody input: ChecklistTemplateInputModel
+    ): ChecklistTemplate {
         val template = ChecklistTemplate(
                 checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateDescription = input.checklistTemplateDescription,
@@ -69,7 +86,12 @@ class ChecklistTemplateController {
 
     @ApiOperation(value = "Creates a new Checklist from a specific Template")
     @PostMapping("/{checklistTemplateId}")
-    fun createChecklistFromTemplate(@PathVariable checklistTemplateId: Long, @RequestBody input: ChecklistInputModel): Checklist {
+    fun createChecklistFromTemplate(
+            @ApiParam(value = "The identifier of the Template from which the Checklist will be created ", required = true)
+            @PathVariable checklistTemplateId: Long,
+            @ApiParam(value = "Input that represents the Checklist to be created", required = true)
+            @RequestBody input: ChecklistInputModel
+    ): Checklist {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         var checklist = Checklist(
                 checklistName = input.checklistName,
@@ -93,7 +115,9 @@ class ChecklistTemplateController {
     @ApiOperation(value = "Creates a new Item on a given Template")
     @PostMapping("/{checklistTemplateId}/items")
     fun addItemTemplateToCheklistTemplate(
+            @ApiParam(value = "The identifier of the Template for which a new Item will be created", required = true)
             @PathVariable checklistTemplateId: Long,
+            @ApiParam(value = "Input that represents the Item to be created", required = true)
             @RequestBody input: ItemTemplateInputModel
     ): ItemTemplate {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
@@ -108,7 +132,10 @@ class ChecklistTemplateController {
 
     @ApiOperation(value = "Updates a set of Templates")
     @PutMapping
-    fun updateChecklistTemplates(@RequestBody input: ChecklistTemplateCollectionInputModel): List<ChecklistTemplate> {
+    fun updateChecklistTemplates(
+            @ApiParam(value = "Input that represents a set of Templates to be updated", required = true)
+            @RequestBody input: ChecklistTemplateCollectionInputModel
+    ): List<ChecklistTemplate> {
         val templates = input
                 .checklists
                 .map {
@@ -128,7 +155,9 @@ class ChecklistTemplateController {
     @ApiOperation(value = "Updates specific Template")
     @PutMapping("/{checklistTemplateId}")
     fun updateSpecificChecklistTemplate(
+            @ApiParam(value = "The identifier of the Template to be updated", required = true)
             @PathVariable checklistTemplateId: Long,
+            @ApiParam(value = "Input that represents the Template updated", required = true)
             @RequestBody input: ChecklistTemplateInputModel
     ): ChecklistTemplate {
         val template = ChecklistTemplate(
@@ -146,7 +175,9 @@ class ChecklistTemplateController {
     @ApiOperation(value = "Updates a set of Items from a Template")
     @PutMapping("/{checklistTemplateId}/items")
     fun updateItemTemplates(
+            @ApiParam(value = "The identifier of the Template for wich the Items will be updated", required = true)
             @PathVariable checklistTemplateId: Long,
+            @ApiParam(value = "Input that represents a set of Items updated", required = true)
             @RequestBody input: ItemTemplateCollectionInputModel
     ): List<ItemTemplate> {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
@@ -164,11 +195,14 @@ class ChecklistTemplateController {
         return itemTemplateRepository.saveAll(itemTemplates.asIterable()).toList()
     }
 
-    @ApiOperation(value = "Updates specific Iem from a Template")
+    @ApiOperation(value = "Updates specific Item from a Template")
     @PutMapping("/{checklistTemplateId}/items/{itemId}")
     fun updateItemTemplate(
+            @ApiParam(value = "The identifier of the Template for wich the Item will be updated", required = true)
             @PathVariable checklistTemplateId: Long,
+            @ApiParam(value = "The identifier of the Item to be updated", required = true)
             @PathVariable itemId: Long,
+            @ApiParam(value = "Input that represents the Item updated", required = true)
             @RequestBody input: ItemTemplateInputModel
     ): ItemTemplate {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
@@ -188,7 +222,10 @@ class ChecklistTemplateController {
 
     @ApiOperation(value = "Deletes specific Template")
     @DeleteMapping("/{checklistTemplateId}")
-    fun deleteSpecificTemplate(@PathVariable checklistTemplateId: Long) {
+    fun deleteSpecificTemplate(
+            @ApiParam(value = "The identifier of the Template to be deleted", required = true)
+            @PathVariable checklistTemplateId: Long
+    ) {
         val checklists: List<Checklist> = checklistRepository.findByTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
         if (checklists.isNotEmpty()) {
             checklists.forEach { it.template = null }
@@ -199,11 +236,19 @@ class ChecklistTemplateController {
 
     @ApiOperation(value = "Deletes all Items from a specific Template")
     @DeleteMapping("{checklistTemplateId}/items")
-    fun deleteItemTemplate(@PathVariable checklistTemplateId: Long) = itemTemplateRepository.deleteByChecklistTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
+    fun deleteItemTemplate(
+            @ApiParam(value = "The identifier of the Template from wich the Items will be deleted", required = true)
+            @PathVariable checklistTemplateId: Long
+    ) = itemTemplateRepository.deleteByChecklistTemplate(ChecklistTemplate(checklistTemplateId = checklistTemplateId))
 
     @ApiOperation(value = "Deletes specific Item from a Template")
     @DeleteMapping("{checklistTemplateId}/items/{itemTemplateId}")
-    fun deleteSpecificItemTemplate(@PathVariable checklistTemplateId: Long, @PathVariable itemTemplateId: Long) = itemTemplateRepository.deleteByChecklistTemplateAndItemTemplateId(ChecklistTemplate(checklistTemplateId = checklistTemplateId), itemTemplateId)
+    fun deleteSpecificItemTemplate(
+            @ApiParam(value = "The identifier of the Template from wich the Item will be deleted", required = true)
+            @PathVariable checklistTemplateId: Long,
+            @ApiParam(value = "The identifier of the Item to be deleted", required = true)
+            @PathVariable itemTemplateId: Long
+    ) = itemTemplateRepository.deleteByChecklistTemplateAndItemTemplateId(ChecklistTemplate(checklistTemplateId = checklistTemplateId), itemTemplateId)
 
 }
 

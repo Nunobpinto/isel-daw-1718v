@@ -3,7 +3,9 @@ package isel.leic.daw.checklistsAPI.controller
 import com.google.code.siren4j.Siren4J
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
+import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/checklists", produces = [Siren4J.JSON_MEDIATYPE])
+@Api(description = "Operations pertaining to Checklists")
 class ChecklistController {
 
     @Autowired
@@ -35,24 +38,35 @@ class ChecklistController {
         return User(username = auth.name)
     }
 
-    @ApiOperation(value = "Returns all the Checklists")
+    @ApiOperation(value = "Returns all Checklists")
     @GetMapping
     fun getAllChecklists() = checklistRepository.findAll()
 
     @ApiOperation(value = "Returns the details of a specific Checklist")
     @GetMapping("/{checklistId}")
-    fun getChecklist(@PathVariable checklistId: Long) = checklistRepository.findById(checklistId).get()
+    fun getChecklist(
+            @ApiParam(value = "The identifier of the desire Checklist ", required = true)
+            @PathVariable checklistId: Long
+    ) = checklistRepository.findById(checklistId).get()
 
     @ApiOperation(value = "Returns all Items of a specific Checklist")
     @GetMapping("/{checklistId}/items")
-    fun getItemsOfChecklist(@PathVariable checklistId: Long): List<Item> {
+    fun getItemsOfChecklist(
+            @ApiParam(value = "The identifier of the Checklist where the Items belong", required = true)
+            @PathVariable checklistId: Long
+    ): List<Item> {
         val checklist = checklistRepository.findById(checklistId).get()
         return itemRepository.findByChecklist(checklist)
     }
 
     @ApiOperation(value = "Returns the details of a specific Item")
     @GetMapping("/{checklistId}/items/{itemId}")
-    fun getItemOfChecklist(@PathVariable checklistId: Long,@PathVariable itemId: Long): ResponseEntity<Entity> {
+    fun getItemOfChecklist(
+            @ApiParam(value = "The identifier of the Checklist where the Item belongs", required = true)
+            @PathVariable checklistId: Long,
+            @ApiParam(value = "The identifier of the Item", required = true)
+            @PathVariable itemId: Long
+    ): ResponseEntity<Entity> {
         val checklist = checklistRepository.findById(checklistId).get()
         val item = itemRepository.findByChecklistAndItemId(checklist, itemId)
         val output = ItemOutputModel(
@@ -67,7 +81,10 @@ class ChecklistController {
 
     @ApiOperation(value = "Creates a new Checklist")
     @PostMapping
-    fun addChecklist(@RequestBody input: ChecklistInputModel): Checklist {
+    fun addChecklist(
+            @ApiParam(value = "Input that represents the Checklist to be created", required = true)
+            @RequestBody input: ChecklistInputModel
+    ): Checklist {
         val checklist = Checklist(
                 checklistName = input.checklistName,
                 checklistDescription = input.checklistDescription,
@@ -81,7 +98,9 @@ class ChecklistController {
     @ApiOperation(value = "Creates a new Item on a given Checklist")
     @PostMapping("/{checklistId}/items")
     fun addItemToList(
+            @ApiParam(value = "The identifier of the Checklist for which a new Item will be created", required = true)
             @PathVariable checklistId: Long,
+            @ApiParam(value = "Input that represents the Item to be created", required = true)
             @RequestBody input: ItemInputModel
     ): Item {
         val checklist = checklistRepository.findById(checklistId).get()
@@ -96,7 +115,10 @@ class ChecklistController {
 
     @ApiOperation(value = "Updates a set of Checklists")
     @PutMapping
-    fun updateChecklists(@RequestBody input: ChecklistCollectionInputModel): List<Checklist> {
+    fun updateChecklists(
+            @ApiParam(value = "Input that represents a set of Checklists to be updated", required = true)
+            @RequestBody input: ChecklistCollectionInputModel
+    ): List<Checklist> {
         val checklists = input
                 .checklists
                 .map {
@@ -116,7 +138,9 @@ class ChecklistController {
     @ApiOperation(value = "Updates specific Checklist")
     @PutMapping("/{checklistId}")
     fun updateSpecificChecklist(
+            @ApiParam(value = "The identifier of the Checklist to be updated", required = true)
             @PathVariable checklistId: Long,
+            @ApiParam(value = "Input that represents the Checklist updated", required = true)
             @RequestBody input: ChecklistInputModel
     ): Checklist {
         val checklist = Checklist(
@@ -134,7 +158,9 @@ class ChecklistController {
     @ApiOperation(value = "Updates a set of Items from a Checklist")
     @PutMapping("/{checklistId}/items")
     fun updateItems(
+            @ApiParam(value = "The identifier of the Checklist for wich the Items will be updated", required = true)
             @PathVariable checklistId: Long,
+            @ApiParam(value = "Input that represents a set of Items updated", required = true)
             @RequestBody input: ItemCollectionInputModel
     ): List<Item> {
         val checklist = checklistRepository.findById(checklistId).get()
@@ -152,11 +178,14 @@ class ChecklistController {
         return itemRepository.saveAll(items.asIterable()).toList()
     }
 
-    @ApiOperation(value = "Updates specific Iem from a Checklist")
+    @ApiOperation(value = "Updates specific Item from a Checklist")
     @PutMapping("/{checklistId}/items/{itemId}")
     fun updateItem(
+            @ApiParam(value = "The identifier of the Checklist for wich the Item will be updated", required = true)
             @PathVariable checklistId: Long,
+            @ApiParam(value = "The identifier of the Item to be updated", required = true)
             @PathVariable itemId: Long,
+            @ApiParam(value = "Input that represents the Item updated", required = true)
             @RequestBody input: ItemInputModel
     ): Item {
         val checklist = checklistRepository.findById(checklistId).get()
@@ -176,14 +205,25 @@ class ChecklistController {
 
     @ApiOperation(value = "Deletes specific Checklist")
     @DeleteMapping("/{checklistId}")
-    fun deleteSpecificChecklist(@PathVariable checklistId: Long) = checklistRepository.deleteById(checklistId)
+    fun deleteSpecificChecklist(
+            @ApiParam(value = "The identifier of the Checklist to be deleted", required = true)
+            @PathVariable checklistId: Long
+    ) = checklistRepository.deleteById(checklistId)
 
     @ApiOperation(value = "Deletes all Items from a specific Checklist")
     @DeleteMapping("{checklistId}/items")
-    fun deleteItem(@PathVariable checklistId: Long) = itemRepository.deleteByChecklist(Checklist(checklistId = checklistId))
+    fun deleteItem(
+            @ApiParam(value = "The identifier of the Checklist from wich the Items will be deleted", required = true)
+            @PathVariable checklistId: Long
+    ) = itemRepository.deleteByChecklist(Checklist(checklistId = checklistId))
 
     @ApiOperation(value = "Deletes specific Item from a Checklist")
     @DeleteMapping("{checklistId}/items/{itemId}")
-    fun deleteSpecificItem(@PathVariable checklistId: Long, @PathVariable itemId: Long) = itemRepository.deleteByChecklistAndItemId(Checklist(checklistId = checklistId), itemId)
+    fun deleteSpecificItem(
+            @ApiParam(value = "The identifier of the Checklist from wich the Item will be deleted", required = true)
+            @PathVariable checklistId: Long,
+            @ApiParam(value = "The identifier of the Item to be deleted", required = true)
+            @PathVariable itemId: Long
+    ) = itemRepository.deleteByChecklistAndItemId(Checklist(checklistId = checklistId), itemId)
 
 }
