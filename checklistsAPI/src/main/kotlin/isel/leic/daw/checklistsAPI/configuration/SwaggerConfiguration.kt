@@ -17,6 +17,7 @@ class SwaggerConfiguration {
 
     @Bean
     fun api() = Docket(DocumentationType.SWAGGER_2)
+            .useDefaultResponseMessages(false)
             .apiInfo(apiInfo())
             .select()
             .apis(RequestHandlerSelectors.any())

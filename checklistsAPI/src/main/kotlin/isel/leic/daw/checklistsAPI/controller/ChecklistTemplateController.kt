@@ -1,11 +1,9 @@
 package isel.leic.daw.checklistsAPI.controller
 
-import io.swagger.annotations.Api
 import com.google.code.siren4j.Siren4J
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
+import io.swagger.annotations.*
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistTemplateCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemTemplateCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
@@ -26,7 +24,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.security.core.context.SecurityContextHolder
 import java.security.Principal
 
 @RestController
@@ -44,6 +41,10 @@ class ChecklistTemplateController {
     lateinit var itemRepository: ItemRepository
 
     @ApiOperation(value = "Returns all Templates")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Templates successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request")
+    )
     @GetMapping
     fun getAllTemplates(
             principal: Principal
@@ -63,6 +64,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Returns the details of a specific Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Template successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @GetMapping("/{checklistTemplateId}")
     fun getTemplate(
             @ApiParam(value = "The identifier of the desire Template ", required = true)
@@ -81,6 +87,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Returns all Items of a specific Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Items successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @GetMapping("/{checklistTemplateId}/items")
     fun getItemsOfChecklistTemplate(
             @ApiParam(value = "The identifier of the Template where the Items belong", required = true)
@@ -106,6 +117,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Returns the details of a specific Item")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Item successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template or Item Not Found")
+    )
     @GetMapping("/{checklistTemplateId}/items/{itemId}")
     fun getItemOfChecklistTemplate(
             @ApiParam(value = "The identifier of the Template where the Item belongs", required = true)
@@ -128,6 +144,10 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Creates a new Template")
+    @ApiResponses(
+            ApiResponse(code = 201, message = "Template successfully created"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct")
+    )
     @PostMapping
     fun addChecklistTemplate(
             @ApiParam(value = "Input that represents the Template to be created", required = true)
@@ -151,6 +171,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Creates a new Checklist from a specific Template")
+    @ApiResponses(
+            ApiResponse(code = 201, message = "Checklist successfully created"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @PostMapping("/{checklistTemplateId}")
     fun createChecklistFromTemplate(
             @ApiParam(value = "The identifier of the Template from which the Checklist will be created ", required = true)
@@ -190,6 +215,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Creates a new Item on a given Template")
+    @ApiResponses(
+            ApiResponse(code = 201, message = "Item successfully created"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @PostMapping("/{checklistTemplateId}/items")
     fun addItemTemplateToCheklistTemplate(
             @ApiParam(value = "The identifier of the Template for which a new Item will be created", required = true)
@@ -219,6 +249,10 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Updates a set of Templates")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Templates successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct")
+    )
     @PutMapping
     fun updateChecklistTemplates(
             @ApiParam(value = "Input that represents a set of Templates to be updated", required = true)
@@ -254,6 +288,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Updates specific Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Template successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @PutMapping("/{checklistTemplateId}")
     fun updateSpecificChecklistTemplate(
             @ApiParam(value = "The identifier of the Template to be updated", required = true)
@@ -284,6 +323,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Updates a set of Items from a Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Items successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @PutMapping("/{checklistTemplateId}/items")
     fun updateItemTemplates(
             @ApiParam(value = "The identifier of the Template for wich the Items will be updated", required = true)
@@ -323,6 +367,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Updates specific Item from a Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Item successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template or Item Not Found")
+    )
     @PutMapping("/{checklistTemplateId}/items/{itemId}")
     fun updateItemTemplate(
             @ApiParam(value = "The identifier of the Template for wich the Item will be updated", required = true)
@@ -354,10 +403,19 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Deletes all Templates")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "All Templates successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request")
+    )
     @DeleteMapping
     fun deleteAllTemplates(principal: Principal) = checklistTemplateRepository.deleteByUser(User(username = principal.name))
 
     @ApiOperation(value = "Deletes specific Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Template successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @DeleteMapping("/{checklistTemplateId}")
     fun deleteSpecificTemplate(
             @ApiParam(value = "The identifier of the Template to be deleted", required = true)
@@ -376,6 +434,11 @@ class ChecklistTemplateController {
     }
 
     @ApiOperation(value = "Deletes all Items from a specific Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "All Items successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template Not Found")
+    )
     @DeleteMapping("{checklistTemplateId}/items")
     fun deleteItemTemplate(
             @ApiParam(value = "The identifier of the Template from wich the Items will be deleted", required = true)
@@ -386,6 +449,11 @@ class ChecklistTemplateController {
     )
 
     @ApiOperation(value = "Deletes specific Item from a Template")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Item successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Template or Item Not Found")
+    )
     @DeleteMapping("{checklistTemplateId}/items/{itemTemplateId}")
     fun deleteSpecificItemTemplate(
             @ApiParam(value = "The identifier of the Template from wich the Item will be deleted", required = true)

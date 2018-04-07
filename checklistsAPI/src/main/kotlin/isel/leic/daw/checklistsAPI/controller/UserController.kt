@@ -1,9 +1,6 @@
 package isel.leic.daw.checklistsAPI.controller
 
 import com.google.code.siren4j.Siren4J
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
 import isel.leic.daw.checklistsAPI.inputModel.single.UserInputModel
 import isel.leic.daw.checklistsAPI.model.User
 import isel.leic.daw.checklistsAPI.repo.UserRepository
@@ -14,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
+import io.swagger.annotations.*
 import isel.leic.daw.checklistsAPI.outputModel.single.UserOutputModel
 
 @RestController
@@ -29,6 +27,11 @@ class UserController {
     }
 
     @ApiOperation(value = "Returns a Specific User")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "User successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "User Not Found")
+    )
     @GetMapping("/{username}")
     fun getUser(
             @ApiParam(value = "The username of the User", required = true)
@@ -45,6 +48,11 @@ class UserController {
     }
 
     @ApiOperation(value = "Creates a New User")
+    @ApiResponses(
+            ApiResponse(code = 201, message = "User created successfully"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 409, message = "User already exists")
+    )
     @PostMapping("/register")
     fun registerUser(
             @ApiParam(value = "Input that represents the User to be created")
@@ -61,6 +69,11 @@ class UserController {
     }
 
     @ApiOperation(value = "Updates Specific User")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "User updated successfully"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "User Not Found")
+    )
     @PutMapping("/{username}")
     fun updateUser(
             @ApiParam(value = "The username of the User to be updated")
@@ -83,6 +96,11 @@ class UserController {
     }
 
     @ApiOperation(value = "Deletes Specific User")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "User deleted successfully"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "User Not Found")
+    )
     @DeleteMapping("/{username}")
     fun deleteUser(
             @ApiParam(value = "The username of the User to be deleted")
@@ -91,6 +109,5 @@ class UserController {
         if(username != getUser().username) throw AccessDeniedException("Forbidden")
         return userRepository.deleteById(username)
     }
-
 
 }

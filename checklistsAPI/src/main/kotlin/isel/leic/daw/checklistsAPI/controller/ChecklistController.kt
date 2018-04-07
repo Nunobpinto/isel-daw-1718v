@@ -3,9 +3,7 @@ package isel.leic.daw.checklistsAPI.controller
 import com.google.code.siren4j.Siren4J
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
+import io.swagger.annotations.*
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
@@ -23,7 +21,6 @@ import isel.leic.daw.checklistsAPI.repo.ItemRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
@@ -39,6 +36,10 @@ class ChecklistController {
     lateinit var itemRepository: ItemRepository
 
     @ApiOperation(value = "Returns all Checklists")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Checklists successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request")
+    )
     @GetMapping
     fun getAllChecklists(
             principal: Principal
@@ -59,6 +60,11 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Returns the details of a specific Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Checklist successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist Not Found")
+    )
     @GetMapping("/{checklistId}")
     fun getChecklist(
             @ApiParam(value = "The identifier of the desire Checklist ", required = true)
@@ -78,6 +84,11 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Returns all Items of a specific Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Items successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist Not Found")
+    )
     @GetMapping("/{checklistId}/items")
     fun getItemsOfChecklist(
             @ApiParam(value = "The identifier of the Checklist where the Items belong", required = true)
@@ -103,6 +114,11 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Returns the details of a specific Item")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Item successfully retrieved"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist or Item Not Found")
+    )
     @GetMapping("/{checklistId}/items/{itemId}")
     fun getItemOfChecklist(
             @ApiParam(value = "The identifier of the Checklist where the Item belongs", required = true)
@@ -125,6 +141,10 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Creates a new Checklist")
+    @ApiResponses(
+            ApiResponse(code = 201, message = "Checklist successfully created"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct")
+    )
     @PostMapping
     fun addChecklist(
             @ApiParam(value = "Input that represents the Checklist to be created", required = true)
@@ -150,6 +170,11 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Creates a new Item on a given Checklist")
+    @ApiResponses(
+            ApiResponse(code = 201, message = "Item successfully created"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist Not Found")
+    )
     @PostMapping("/{checklistId}/items")
     fun addItemToList(
             @ApiParam(value = "The identifier of the Checklist for which a new Item will be created", required = true)
@@ -177,6 +202,10 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Updates a set of Checklists")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Checklists successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct")
+    )
     @PutMapping
     fun updateChecklists(
             @ApiParam(value = "Input that represents a set of Checklists to be updated", required = true)
@@ -212,6 +241,11 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Updates specific Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Checklist successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist Not Found")
+    )
     @PutMapping("/{checklistId}")
     fun updateSpecificChecklist(
             @ApiParam(value = "The identifier of the Checklist to be updated", required = true)
@@ -242,6 +276,11 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Updates a set of Items from a Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Items successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist Not Found")
+    )
     @PutMapping("/{checklistId}/items")
     fun updateItems(
             @ApiParam(value = "The identifier of the Checklist for wich the Items will be updated", required = true)
@@ -279,6 +318,11 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Updates specific Item from a Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Item successfully updated"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist or Item Not Found")
+    )
     @PutMapping("/{checklistId}/items/{itemId}")
     fun updateItem(
             @ApiParam(value = "The identifier of the Checklist for wich the Item will be updated", required = true)
@@ -309,10 +353,19 @@ class ChecklistController {
     }
 
     @ApiOperation(value = "Deletes all Checklists")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "All Checklists successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request")
+    )
     @DeleteMapping
     fun deleteAllChecklists(principal: Principal) = checklistRepository.deleteByUser(User(username = principal.name))
 
     @ApiOperation(value = "Deletes specific Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Checklist successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist Not Found")
+    )
     @DeleteMapping("/{checklistId}")
     fun deleteSpecificChecklist(
             @ApiParam(value = "The identifier of the Checklist to be deleted", required = true)
@@ -321,6 +374,11 @@ class ChecklistController {
     ) = checklistRepository.deleteByChecklistIdAndUser(checklistId, User(username = principal.name))
 
     @ApiOperation(value = "Deletes all Items from a specific Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "All Items successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist Not Found")
+    )
     @DeleteMapping("{checklistId}/items")
     fun deleteItem(
             @ApiParam(value = "The identifier of the Checklist from which the Items will be deleted", required = true)
@@ -330,6 +388,11 @@ class ChecklistController {
             .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") }))
 
     @ApiOperation(value = "Deletes specific Item from a Checklist")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Item successfully deleted"),
+            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
+            ApiResponse(code = 404, message = "Checklist or Item Not Found")
+    )
     @DeleteMapping("{checklistId}/items/{itemId}")
     fun deleteSpecificItem(
             @ApiParam(value = "The identifier of the Checklist from wich the Item will be deleted", required = true)
