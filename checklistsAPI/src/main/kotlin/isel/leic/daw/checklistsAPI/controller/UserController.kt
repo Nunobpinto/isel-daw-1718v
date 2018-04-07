@@ -13,6 +13,8 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import com.google.code.siren4j.component.Entity
+import com.google.code.siren4j.converter.ReflectingConverter
+import isel.leic.daw.checklistsAPI.outputModel.single.UserOutputModel
 
 @RestController
 @RequestMapping("/users",produces = [Siren4J.JSON_MEDIATYPE])
@@ -31,8 +33,15 @@ class UserController {
     fun getUser(
             @ApiParam(value = "The username of the User", required = true)
             @PathVariable username: String
-    ) : ResponseEntity<Entity> {
-        return userRepository.findById(username).get()
+    ): ResponseEntity<Entity> {
+        val user = userRepository.findById(username).get()
+        val output = UserOutputModel(
+                username = user.username,
+                familyName = user.familyName,
+                givenName = user.givenName,
+                email = user.email
+        )
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @ApiOperation(value = "Creates a New User")
@@ -40,7 +49,7 @@ class UserController {
     fun registerUser(
             @ApiParam(value = "Input that represents the User to be created")
             @RequestBody input: UserInputModel
-    ) : ResponseEntity<Entity> {
+    ) : User {
         val user = User(
                 username = input.username,
                 familyName = input.familyName,
@@ -58,7 +67,7 @@ class UserController {
             @PathVariable username : String,
             @ApiParam(value = "Input that represents the User to be updated")
             @RequestBody input: UserInputModel
-    ) : ResponseEntity<Entity> {
+    ) : User {
         val currentUser = userRepository.findById(input.username)
         if(currentUser.get().username != getUser().username) throw AccessDeniedException("Forbidden")
         val user = User(

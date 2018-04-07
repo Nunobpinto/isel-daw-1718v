@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.security.core.context.SecurityContextHolder
+import java.security.Principal
 
 @RestController
 @RequestMapping("/api/templates", produces = [Siren4J.JSON_MEDIATYPE])
@@ -51,14 +52,14 @@ class ChecklistTemplateController {
     @GetMapping("/{checklistTemplateId}")
     fun getTemplate(
             @ApiParam(value = "The identifier of the desire Template ", required = true)
-            @PathVariable checklistTemplateId: Long
+            @PathVariable checklistTemplateId: Long,
+            principal: Principal
     ) : ResponseEntity<Entity> {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val output = ChecklistTemplateOutputModel(
-                checklistId = checklist.checklistId,
-                name = checklist.checklistName,
-                description = checklist.checklistDescription,
-                completionDate = checklist.completionDate.toString(),
+                templateId = checklistTemplateId,
+                name = template.checklistTemplateName,
+                description = template.checklistTemplateDescription,
                 username = principal.name
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -69,7 +70,7 @@ class ChecklistTemplateController {
     fun getItemsOfChecklistTemplate(
             @ApiParam(value = "The identifier of the Template where the Items belong", required = true)
             @PathVariable checklistTemplateId: Long
-    ): ResponseEntity<Entity> {
+    ): List<ItemTemplate> {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
         return itemTemplateRepository.findByChecklistTemplate(checklistTemplate)
     }
@@ -85,8 +86,8 @@ class ChecklistTemplateController {
         val checklistTemplate = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplate = itemTemplateRepository.findByChecklistTemplateAndItemTemplateId(checklistTemplate, itemId)
         val output = ItemTemplateOutputModel(
-                name = itemTemplate.itemTemplateName!!,
-                description = itemTemplate.itemTemplateDescription!!,
+                name = itemTemplate.itemTemplateName,
+                description = itemTemplate.itemTemplateDescription,
                 state = itemTemplate.itemTemplateState.toString(),
                 itemTemplateId = itemTemplate.itemTemplateId,
                 templateId = checklistTemplateId
@@ -99,7 +100,7 @@ class ChecklistTemplateController {
     fun addChecklistTemplate(
             @ApiParam(value = "Input that represents the Template to be created", required = true)
             @RequestBody input: ChecklistTemplateInputModel
-    ): ResponseEntity<Entity> {
+    ): ChecklistTemplate {
         val template = ChecklistTemplate(
                 checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateDescription = input.checklistTemplateDescription,
@@ -115,11 +116,12 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Checklist to be created", required = true)
             @RequestBody input: ChecklistInputModel
-    ): ResponseEntity<Entity> {
+    ): Checklist {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         var checklist = Checklist(
                 checklistName = input.checklistName,
                 completionDate = input.completionDate,
+                checklistDescription = input.checklistDescription,
                 template = template,
                 user = getUser()
         )
@@ -143,7 +145,7 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Item to be created", required = true)
             @RequestBody input: ItemTemplateInputModel
-    ): ResponseEntity<Entity> {
+    ): ItemTemplate {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,
@@ -159,7 +161,7 @@ class ChecklistTemplateController {
     fun updateChecklistTemplates(
             @ApiParam(value = "Input that represents a set of Templates to be updated", required = true)
             @RequestBody input: ChecklistTemplateCollectionInputModel
-    ): ResponseEntity<Entity> {
+    ): List<ChecklistTemplate> {
         val templates = input
                 .checklists
                 .map {
@@ -183,7 +185,7 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Template updated", required = true)
             @RequestBody input: ChecklistTemplateInputModel
-    ): ResponseEntity<Entity> {
+    ): ChecklistTemplate {
         val template = ChecklistTemplate(
                 checklistTemplateName = input.checklistTemplateName,
                 checklistTemplateId = checklistTemplateId,
@@ -203,7 +205,7 @@ class ChecklistTemplateController {
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
             @RequestBody input: ItemTemplateCollectionInputModel
-    ): ResponseEntity<Entity> {
+    ): List<ItemTemplate> {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplates = input
                 .itemTemplates
@@ -228,7 +230,7 @@ class ChecklistTemplateController {
             @PathVariable itemId: Long,
             @ApiParam(value = "Input that represents the Item updated", required = true)
             @RequestBody input: ItemTemplateInputModel
-    ): ResponseEntity<Entity> {
+    ): ItemTemplate {
         val template = checklistTemplateRepository.findById(checklistTemplateId).get()
         val itemTemplate = ItemTemplate(
                 itemTemplateName = input.itemTemplateName,

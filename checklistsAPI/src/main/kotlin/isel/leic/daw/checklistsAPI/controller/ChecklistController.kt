@@ -67,7 +67,7 @@ class ChecklistController {
     fun getItemsOfChecklist(
             @ApiParam(value = "The identifier of the Checklist where the Items belong", required = true)
             @PathVariable checklistId: Long
-    ): ResponseEntity<Entity> {
+    ): List<Item> {
         val checklist = checklistRepository.findById(checklistId).get()
         return itemRepository.findByChecklist(checklist)
     }
@@ -147,7 +147,7 @@ class ChecklistController {
     fun updateChecklists(
             @ApiParam(value = "Input that represents a set of Checklists to be updated", required = true)
             @RequestBody input: ChecklistCollectionInputModel
-    ): ResponseEntity<Entity>{
+    ): List<Checklist> {
         val checklists = input
                 .checklists
                 .map {
@@ -170,7 +170,8 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist to be updated", required = true)
             @PathVariable checklistId: Long,
             @ApiParam(value = "Input that represents the Checklist updated", required = true)
-            @RequestBody input: ChecklistInputModel
+            @RequestBody input: ChecklistInputModel,
+            principal: Principal
     ): ResponseEntity<Entity> {
         var checklist = Checklist(
                 checklistName = input.checklistName,
@@ -199,7 +200,7 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
             @RequestBody input: ItemCollectionInputModel
-    ): ResponseEntity<Entity>{
+    ): List<Item>{
         val checklist = checklistRepository.findById(checklistId).get()
         val items = input
                 .items
