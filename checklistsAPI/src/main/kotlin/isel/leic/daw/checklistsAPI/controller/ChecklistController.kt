@@ -8,10 +8,7 @@ import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistCollectionInpu
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ItemInputModel
-import isel.leic.daw.checklistsAPI.model.Checklist
-import isel.leic.daw.checklistsAPI.model.Item
-import isel.leic.daw.checklistsAPI.model.State
-import isel.leic.daw.checklistsAPI.model.User
+import isel.leic.daw.checklistsAPI.model.*
 import isel.leic.daw.checklistsAPI.outputModel.collection.ChecklistCollectionOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.collection.ItemCollectionOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistOutputModel
@@ -254,17 +251,18 @@ class ChecklistController {
             @RequestBody input: ChecklistInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        var checklist = Checklist(
+        val originalChecklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+        val checklist = Checklist(
                 checklistName = input.checklistName,
                 checklistId = checklistId,
                 checklistDescription = input.checklistDescription,
+                completionDate = input.completionDate,
                 user = User(username = principal.name),
-                items = itemRepository.findByChecklist(
-                        checklistRepository.findByChecklistIdAndUser(input.checklistId, User(username = principal.name))
-                                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-                ).toMutableSet()
+                items = itemRepository.findByChecklist(originalChecklist).toMutableSet(),
+                template = originalChecklist.template
         )
-        checklist = checklistRepository.save(checklist)
+        checklistRepository.save(checklist)
         val output = ChecklistOutputModel(
                 checklistId = checklist.checklistId,
                 name = checklist.checklistName,
