@@ -8,13 +8,15 @@ import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistCollectionInpu
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ItemInputModel
+import isel.leic.daw.checklistsAPI.mappers.InputMapper
+import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.model.*
 import isel.leic.daw.checklistsAPI.outputModel.collection.ChecklistCollectionOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.collection.ItemCollectionOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.single.ItemOutputModel
-import isel.leic.daw.checklistsAPI.repo.ChecklistRepository
-import isel.leic.daw.checklistsAPI.repo.ItemRepository
+import isel.leic.daw.checklistsAPI.service.ChecklistService
+import isel.leic.daw.checklistsAPI.service.ItemServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
@@ -28,9 +30,12 @@ import java.security.Principal
 class ChecklistController {
 
     @Autowired
-    lateinit var checklistRepository: ChecklistRepository
+    lateinit var checklistService: ChecklistService
     @Autowired
-    lateinit var itemRepository: ItemRepository
+    lateinit var itemServiceImpl: ItemServiceImpl
+
+    lateinit var inputMapper: InputMapper
+    lateinit var outputMapper: OutputMapper
 
     @ApiOperation(value = "Returns all Checklists")
     @ApiResponses(
@@ -41,7 +46,7 @@ class ChecklistController {
     fun getAllChecklists(
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklists = checklistRepository.findByUser(User(username = principal.name))
+        val checklists = checklistService.getChecklistByUser(User(username = principal.name))
         val output = ChecklistCollectionOutputModel(
                 checklists.map {
                     ChecklistOutputModel(
@@ -68,7 +73,7 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val output = ChecklistOutputModel(
                 checklistId = checklist.checklistId,
@@ -92,9 +97,9 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-        val items = itemRepository.findByChecklist(checklist)
+        val items = itemServiceImpl.getItemsByChecklist(checklist)
         val output = ItemCollectionOutputModel(
                 checklistId,
                 items.map {
@@ -124,9 +129,9 @@ class ChecklistController {
             @PathVariable itemId: Long,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-        val item = itemRepository.findByChecklistAndItemId(checklist, itemId)
+        val item = itemServiceImpl.getItemByChecklistAndItemId(checklist, itemId)
         val output = ItemOutputModel(
                 checklistId = checklistId,
                 itemId = item.itemId,
@@ -155,7 +160,7 @@ class ChecklistController {
                 completionDate = input.completionDate,
                 user = User(username = principal.name)
         )
-        checklist = checklistRepository.save(checklist)
+        checklist = checklistService.saveChecklist(checklist)
         val output = ChecklistOutputModel(
                 checklistId = checklist.checklistId,
                 name = checklist.checklistName,
@@ -180,7 +185,7 @@ class ChecklistController {
             @RequestBody input: ItemInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         var item = Item(
                 itemName = input.itemName,
@@ -188,7 +193,7 @@ class ChecklistController {
                 itemState = State.valueOf(input.itemState),
                 checklist = checklist
         )
-        item = itemRepository.save(item)
+        item = itemServiceImpl.saveItem(item)
         val output = ItemOutputModel(
                 checklistId = checklist.checklistId,
                 name = item.itemName,
@@ -216,13 +221,13 @@ class ChecklistController {
                             checklistDescription = it.checklistDescription,
                             checklistId = it.checklistId,
                             user = User(username = principal.name),
-                            items = itemRepository.findByChecklist(
-                                    checklistRepository.findByChecklistIdAndUser(it.checklistId, User(username = principal.name))
+                            items = itemServiceImpl.getItemsByChecklist(
+                                    checklistService.getChecklistByIdAndUser(it.checklistId, User(username = principal.name))
                                             .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
                             ).toMutableSet()
                     )
                 }
-        checklistRepository.saveAll(checklists.asIterable())
+        checklistService.saveAllChecklists(checklists.asIterable())
         val output = ChecklistCollectionOutputModel(
                 checklists.map {
                     ChecklistOutputModel(
@@ -251,7 +256,7 @@ class ChecklistController {
             @RequestBody input: ChecklistInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val originalChecklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+        val originalChecklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val checklist = Checklist(
                 checklistName = input.checklistName,
@@ -259,10 +264,10 @@ class ChecklistController {
                 checklistDescription = input.checklistDescription,
                 completionDate = input.completionDate,
                 user = User(username = principal.name),
-                items = itemRepository.findByChecklist(originalChecklist).toMutableSet(),
+                items = itemServiceImpl.getItemsByChecklist(originalChecklist).toMutableSet(),
                 template = originalChecklist.template
         )
-        checklistRepository.save(checklist)
+        checklistService.saveChecklist(checklist)
         val output = ChecklistOutputModel(
                 checklistId = checklist.checklistId,
                 name = checklist.checklistName,
@@ -287,7 +292,7 @@ class ChecklistController {
             @RequestBody input: ItemCollectionInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val items = input
                 .items
@@ -331,7 +336,7 @@ class ChecklistController {
             @RequestBody input: ItemInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         var item = Item(
                 itemName = input.itemName,
@@ -340,7 +345,7 @@ class ChecklistController {
                 checklist = checklist,
                 itemId = itemId
         )
-        item = itemRepository.save(item)
+        item = itemServiceImpl.saveItem(item)
         val output = ItemOutputModel(
                 checklistId = checklist.checklistId,
                 name = item.itemName,
@@ -356,7 +361,7 @@ class ChecklistController {
             ApiResponse(code = 400, message = "Bad Request")
     )
     @DeleteMapping
-    fun deleteAllChecklists(principal: Principal) = checklistRepository.deleteByUser(User(username = principal.name))
+    fun deleteAllChecklists(principal: Principal) = checklistService.deleteAllChecklistByUser(User(username = principal.name))
 
     @ApiOperation(value = "Deletes specific Checklist")
     @ApiResponses(
@@ -369,7 +374,7 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist to be deleted", required = true)
             @PathVariable checklistId: Long,
             principal: Principal
-    ) = checklistRepository.deleteByChecklistIdAndUser(checklistId, User(username = principal.name))
+    ) = checklistService.deleteChecklistByIdAndUser(checklistId, User(username = principal.name))
 
     @ApiOperation(value = "Deletes all Items from a specific Checklist")
     @ApiResponses(
@@ -378,11 +383,11 @@ class ChecklistController {
             ApiResponse(code = 404, message = "Checklist Not Found")
     )
     @DeleteMapping("{checklistId}/items")
-    fun deleteItem(
+    fun deleteItems(
             @ApiParam(value = "The identifier of the Checklist from which the Items will be deleted", required = true)
             @PathVariable checklistId: Long,
             principal: Principal
-    ) = itemRepository.deleteByChecklist(checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+    ) = itemServiceImpl.deleteAllItemsByChecklist(checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
             .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") }))
 
     @ApiOperation(value = "Deletes specific Item from a Checklist")
@@ -398,8 +403,8 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Item to be deleted", required = true)
             @PathVariable itemId: Long,
             principal: Principal
-    ) = itemRepository.deleteByChecklistAndItemId(
-            checklistRepository.findByChecklistIdAndUser(checklistId, User(username = principal.name))
+    ) = itemServiceImpl.deleteItemByIdAndChecklist(
+            checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                     .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
             , itemId
     )

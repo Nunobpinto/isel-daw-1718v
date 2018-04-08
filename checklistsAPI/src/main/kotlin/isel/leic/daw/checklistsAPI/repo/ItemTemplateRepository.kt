@@ -15,7 +15,7 @@ interface ItemTemplateRepository : CrudRepository<ItemTemplate, Long> {
     @Transactional
     fun deleteByChecklistTemplateAndItemTemplateId(checklistTemplate: ChecklistTemplate, itemTemplateId: Long): Long
 
-    fun findByChecklistTemplate(checklistTemplate: ChecklistTemplate) : List<ItemTemplate>
+    fun findByChecklistTemplate(checklistTemplate: ChecklistTemplate): List<ItemTemplate>
 
-    fun findByChecklistTemplateAndItemTemplateId(checklistTemplate: ChecklistTemplate, itemTemplateId: Long) : ItemTemplate
+    fun findByChecklistTemplateAndItemTemplateId(checklistTemplate: ChecklistTemplate, itemTemplateId: Long): ItemTemplate
 }

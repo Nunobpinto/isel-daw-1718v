@@ -1,27 +1,13 @@
 package isel.leic.daw.checklistsAPI.service
 
-import isel.leic.daw.checklistsAPI.repo.UserRepository
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.stereotype.Service
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import isel.leic.daw.checklistsAPI.model.User
 
-@Service
-class UserService : UserDetailsService {
+interface UserService {
 
-    @Autowired
-    lateinit var userRepository: UserRepository
+    fun getUser(username: String): User
 
-    override fun loadUserByUsername(username: String): UserDetails {
-        val user = userRepository.findById(username).get()
-        val bCryptPasswordEncoder = BCryptPasswordEncoder()
+    fun saveUser(user: User): User
 
-        return org.springframework.security.core.userdetails
-                .User
-                .withUsername(user.username)
-                .password(bCryptPasswordEncoder.encode(user.password))
-                .roles("USER")
-                .build()
-    }
+    fun deleteUser(username: String)
+
 }

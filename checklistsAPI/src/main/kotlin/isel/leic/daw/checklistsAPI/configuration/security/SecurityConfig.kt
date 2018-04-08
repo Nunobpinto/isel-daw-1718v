@@ -1,6 +1,5 @@
 package isel.leic.daw.checklistsAPI.configuration.security
 
-import isel.leic.daw.checklistsAPI.service.UserService
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -24,7 +23,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     }
 
     @Autowired
-    lateinit var userService: UserService
+    lateinit var userConfig: UserConfig
 
     override fun configure(http: HttpSecurity) {
         http
@@ -42,7 +41,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     @Bean
     fun authenticationProvider(): DaoAuthenticationProvider {
         val auth = DaoAuthenticationProvider()
-        auth.setUserDetailsService(userService)
+        auth.setUserDetailsService(userConfig)
         auth.setPasswordEncoder(passwordEncoder())
         return auth
     }

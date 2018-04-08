@@ -3,28 +3,28 @@ package isel.leic.daw.checklistsAPI.controller
 import com.google.code.siren4j.Siren4J
 import isel.leic.daw.checklistsAPI.inputModel.single.UserInputModel
 import isel.leic.daw.checklistsAPI.model.User
-import isel.leic.daw.checklistsAPI.repo.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.*
+import isel.leic.daw.checklistsAPI.mappers.InputMapper
+import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.outputModel.single.UserOutputModel
+import isel.leic.daw.checklistsAPI.service.UserServiceImpl
+import java.security.Principal
 
 @RestController
-@RequestMapping("/users",produces = [Siren4J.JSON_MEDIATYPE])
+@RequestMapping("/users", produces = [Siren4J.JSON_MEDIATYPE])
 @Api(description = "Operations pertaining to Users")
 class UserController {
-    @Autowired
-    lateinit var userRepository: UserRepository
 
-    fun getUser(): User {
-        val auth = SecurityContextHolder.getContext().authentication
-        return User(username = auth.name)
-    }
+    @Autowired
+    lateinit var userServiceImpl: UserServiceImpl
+    lateinit var inputMapper: InputMapper
+    lateinit var outputMapper: OutputMapper
 
     @ApiOperation(value = "Returns a Specific User")
     @ApiResponses(
@@ -37,13 +37,8 @@ class UserController {
             @ApiParam(value = "The username of the User", required = true)
             @PathVariable username: String
     ): ResponseEntity<Entity> {
-        val user = userRepository.findById(username).get()
-        val output = UserOutputModel(
-                username = user.username,
-                familyName = user.familyName,
-                givenName = user.givenName,
-                email = user.email
-        )
+        val user = userServiceImpl.getUser(username)
+        val output = outputMapper.toUserOutput(user)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -57,15 +52,9 @@ class UserController {
     fun registerUser(
             @ApiParam(value = "Input that represents the User to be created")
             @RequestBody input: UserInputModel
-    ) : User {
-        val user = User(
-                username = input.username,
-                familyName = input.familyName,
-                givenName = input.givenName,
-                email = input.email,
-                password = input.password
-        )
-        return userRepository.save(user)
+    ): User {
+        val user = inputMapper.toUser(input)
+        return userServiceImpl.saveUser(user)
     }
 
     @ApiOperation(value = "Updates Specific User")
@@ -77,22 +66,23 @@ class UserController {
     @PutMapping("/{username}")
     fun updateUser(
             @ApiParam(value = "The username of the User to be updated")
-            @PathVariable username : String,
+            @PathVariable username: String,
             @ApiParam(value = "Input that represents the User to be updated")
-            @RequestBody input: UserInputModel
-    ) : User {
-        val currentUser = userRepository.findById(input.username)
-        if(currentUser.get().username != getUser().username) throw AccessDeniedException("Forbidden")
+            @RequestBody input: UserInputModel,
+            principal: Principal
+    ): User {
+        val currentUser = userServiceImpl.getUser(input.username)
+        if (currentUser.username != principal.name) throw AccessDeniedException("Forbidden")
         val user = User(
-                username = currentUser.get().username,
+                username = currentUser.username,
                 email = input.email,
                 givenName = input.givenName,
                 familyName = input.familyName,
                 password = input.password,
-                checklists = currentUser.get().checklists,
-                checklistTemplates = currentUser.get().checklistTemplates
+                checklists = currentUser.checklists,
+                checklistTemplates = currentUser.checklistTemplates
         )
-        return userRepository.save(user)
+        return userServiceImpl.saveUser(user)
     }
 
     @ApiOperation(value = "Deletes Specific User")
@@ -104,10 +94,11 @@ class UserController {
     @DeleteMapping("/{username}")
     fun deleteUser(
             @ApiParam(value = "The username of the User to be deleted")
-            @PathVariable username:String
+            @PathVariable username: String,
+            principal: Principal
     ) {
-        if(username != getUser().username) throw AccessDeniedException("Forbidden")
-        return userRepository.deleteById(username)
+        if (username != principal.name) throw AccessDeniedException("Forbidden")
+        return userServiceImpl.deleteUser(username)
     }
 
 }
