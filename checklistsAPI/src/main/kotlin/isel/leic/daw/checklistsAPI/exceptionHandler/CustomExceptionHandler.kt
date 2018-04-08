@@ -1,6 +1,7 @@
 package isel.leic.daw.checklistsAPI.exceptionHandler
 
 import isel.leic.daw.checklistsAPI.exceptions.BadRequestException
+import isel.leic.daw.checklistsAPI.exceptions.ConflictException
 import isel.leic.daw.checklistsAPI.exceptions.NotFoundException
 import isel.leic.daw.checklistsAPI.exceptions.UnauthenticatedException
 import isel.leic.daw.checklistsAPI.outputModel.error.ErrorOutputModel
@@ -19,17 +20,17 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [(NoSuchElementException::class)])
     fun handleNoSuchElementException(
-            ex:Exception,
-            request:WebRequest
-    ) : ResponseEntity<ErrorOutputModel> {
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
         return ResponseEntity(
-                    ErrorOutputModel(
-                            title = "Not Found",
-                            detail = "Could not find the resource you wanted",
-                            status = 404
-                    ),
+                ErrorOutputModel(
+                        title = "Not Found",
+                        detail = "Could not find the resource you wanted",
+                        status = 404
+                ),
                 httpHeaders,
                 HttpStatus.NOT_FOUND
         )
@@ -37,9 +38,9 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [(AccessDeniedException::class)])
     fun handleAccessDeniedException(
-            ex:Exception,
-            request:WebRequest
-    ) : ResponseEntity<ErrorOutputModel> {
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
         return ResponseEntity(
@@ -54,9 +55,9 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [(HibernateException::class)])
     fun handleHibernateException(
-            ex:Exception,
-            request:WebRequest
-    ) : ResponseEntity<ErrorOutputModel> {
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
         return ResponseEntity(
@@ -71,9 +72,9 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [(NotFoundException::class)])
     fun handleNotFoundException(
-            ex:Exception,
-            request:WebRequest
-    ) : ResponseEntity<ErrorOutputModel> {
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
         return ResponseEntity(
@@ -88,9 +89,9 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [(BadRequestException::class)])
     fun handleBadRequestException(
-            ex:Exception,
-            request:WebRequest
-    ) : ResponseEntity<ErrorOutputModel> {
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
         return ResponseEntity(
@@ -105,9 +106,9 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [(UnauthenticatedException::class)])
     fun handleUnauthenticatedException(
-            ex:Exception,
-            request:WebRequest
-    ) : ResponseEntity<ErrorOutputModel> {
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
         return ResponseEntity(
@@ -118,5 +119,22 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
                 ),
                 httpHeaders,
                 HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(value = [(ConflictException::class)])
+    fun handleConflictException(
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
+        val httpHeaders = HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
+        return ResponseEntity(
+                ErrorOutputModel(
+                        title = "Conflict",
+                        detail = "The resource already exists",
+                        status = 409
+                ),
+                httpHeaders,
+                HttpStatus.CONFLICT)
     }
 }
