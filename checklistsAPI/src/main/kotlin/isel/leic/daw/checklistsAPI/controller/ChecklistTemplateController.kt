@@ -14,9 +14,6 @@ import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.model.*
 import isel.leic.daw.checklistsAPI.outputModel.collection.ChecklistTemplateCollectionOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.collection.ItemTemplateCollectionOutputModel
-import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistOutputModel
-import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistTemplateOutputModel
-import isel.leic.daw.checklistsAPI.outputModel.single.ItemTemplateOutputModel
 import isel.leic.daw.checklistsAPI.service.ChecklistService
 import isel.leic.daw.checklistsAPI.service.ChecklistTemplateService
 import isel.leic.daw.checklistsAPI.service.ItemService
@@ -42,8 +39,8 @@ class ChecklistTemplateController {
     @Autowired
     lateinit var itemService: ItemService
 
-    lateinit var inputMapper: InputMapper
-    lateinit var outputMapper: OutputMapper
+    val inputMapper: InputMapper = InputMapper()
+    val outputMapper: OutputMapper = OutputMapper()
 
 
     @ApiOperation(value = "Returns all Templates")
@@ -162,15 +159,17 @@ class ChecklistTemplateController {
         val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
         val checklist = checklistService.saveChecklist(
-                inputMapper.toChecklist(input, User(username = principal.name), template)
+                inputMapper.toChecklist(input, User(username = principal.name))
         )
         val items = itemTemplateService
                 .getItemsByTemplate(template)
                 .map { itemTemplate ->
-                    Item(itemName = itemTemplate.itemTemplateName,
+                    Item(
+                            itemName = itemTemplate.itemTemplateName,
                             itemDescription = itemTemplate.itemTemplateDescription,
                             itemState = itemTemplate.itemTemplateState,
-                            checklist = checklist)
+                            checklist = checklist
+                    )
                 }
         itemService.saveAllItems(items)
         val output = outputMapper.toChecklistOutput(checklist, principal.name)
@@ -215,26 +214,21 @@ class ChecklistTemplateController {
     ): ResponseEntity<Entity> {
         val templates = input
                 .checklists
-                .map { ChecklistTemplate(
-                            checklistTemplateName = it.checklistTemplateName,
-                            checklistTemplateId = it.checklistTemplateId,
-                            checklistTemplateDescription = it.checklistTemplateDescription,
-                            user = User(username = principal.name),
-                            items = itemTemplateService.getItemsByTemplate(
-                                    checklistTemplateService.getTemplateByIdAndUser(it.checklistTemplateId, User(username = principal.name))
-                                            .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
-                            ).toMutableSet()
-                    )
+                .map {
+                    inputMapper.toChecklistTemplate(
+                            it,
+                            User(username = principal.name),
+                            itemTemplateService.getItemsByTemplate(
+                                    checklistTemplateService.getTemplateByIdAndUser(
+                                            it.checklistTemplateId,
+                                            User(username = principal.name)
+                                    ).orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                            ).toMutableSet())
                 }
         checklistTemplateService.saveAllTemplates(templates.asIterable())
         val output = ChecklistTemplateCollectionOutputModel(
                 templates.map {
-                    ChecklistTemplateOutputModel(
-                            templateId = it.checklistTemplateId,
-                            name = it.checklistTemplateName,
-                            description = it.checklistTemplateDescription,
-                            username = principal.name
-                    )
+                    outputMapper.toChecklistTemplateOutput(it, principal.name)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -254,24 +248,20 @@ class ChecklistTemplateController {
             @RequestBody input: ChecklistTemplateInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
+        val items = itemTemplateService.getItemsByTemplate(
+                checklistTemplateService.getTemplateByIdAndUser(
+                        checklistTemplateId,
+                        User(username = principal.name)
+                ).orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+        ).toMutableSet()
         val template = checklistTemplateService.saveTemplate(
-                ChecklistTemplate(
-                        checklistTemplateName = input.checklistTemplateName,
-                        checklistTemplateId = checklistTemplateId,
-                        checklistTemplateDescription = input.checklistTemplateDescription,
-                        user = User(username = principal.name),
-                        items = itemTemplateService.getItemsByTemplate(
-                                checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                                        .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
-                        ).toMutableSet()
+                inputMapper.toChecklistTemplate(
+                        input,
+                        User(username = principal.name),
+                        items
                 )
         )
-        val output = ChecklistTemplateOutputModel(
-                templateId = checklistTemplateId,
-                name = template.checklistTemplateName,
-                description = template.checklistTemplateDescription,
-                username = principal.name
-        )
+        val output = outputMapper.toChecklistTemplateOutput(template, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -295,25 +285,13 @@ class ChecklistTemplateController {
                 input
                         .itemTemplates
                         .map {
-                            ItemTemplate(
-                                    itemTemplateName = it.itemTemplateName,
-                                    itemTemplateDescription = it.itemTemplateDescription,
-                                    itemTemplateState = State.valueOf(it.itemTemplateState),
-                                    checklistTemplate = template,
-                                    itemTemplateId = it.itemTemplateId
-                            )
+                            inputMapper.toItemTemplate(it, template)
                         }
         itemTemplateService.saveAllItemTemplates(itemTemplates.asIterable())
         val output = ItemTemplateCollectionOutputModel(
                 checklistTemplateId,
                 itemTemplates.map {
-                    ItemTemplateOutputModel(
-                            itemTemplateId = it.itemTemplateId,
-                            name = it.itemTemplateName,
-                            description = it.itemTemplateDescription,
-                            state = it.itemTemplateState.toString(),
-                            templateId = checklistTemplateId
-                    )
+                    outputMapper.toItemTemplateOutput(it, checklistTemplateId)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -337,21 +315,10 @@ class ChecklistTemplateController {
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
-        val itemTemplate = ItemTemplate(
-                itemTemplateName = input.itemTemplateName,
-                itemTemplateDescription = input.itemTemplateDescription,
-                itemTemplateState = State.valueOf(input.itemTemplateState),
-                checklistTemplate = template,
-                itemTemplateId = itemId
-        )
+        input.itemTemplateId = itemId
+        val itemTemplate = inputMapper.toItemTemplate(input, template)
         itemTemplateService.saveItemTemplate(itemTemplate)
-        val output = ItemTemplateOutputModel(
-                name = itemTemplate.itemTemplateName,
-                description = itemTemplate.itemTemplateDescription,
-                state = itemTemplate.itemTemplateState.toString(),
-                itemTemplateId = itemTemplate.itemTemplateId,
-                templateId = checklistTemplateId
-        )
+        val output = outputMapper.toItemTemplateOutput(itemTemplate, checklistTemplateId)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 

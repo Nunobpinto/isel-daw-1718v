@@ -13,8 +13,6 @@ import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.model.*
 import isel.leic.daw.checklistsAPI.outputModel.collection.ChecklistCollectionOutputModel
 import isel.leic.daw.checklistsAPI.outputModel.collection.ItemCollectionOutputModel
-import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistOutputModel
-import isel.leic.daw.checklistsAPI.outputModel.single.ItemOutputModel
 import isel.leic.daw.checklistsAPI.service.ChecklistService
 import isel.leic.daw.checklistsAPI.service.ItemServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,8 +32,8 @@ class ChecklistController {
     @Autowired
     lateinit var itemServiceImpl: ItemServiceImpl
 
-    lateinit var inputMapper: InputMapper
-    lateinit var outputMapper: OutputMapper
+    val inputMapper: InputMapper = InputMapper()
+    val outputMapper: OutputMapper = OutputMapper()
 
     @ApiOperation(value = "Returns all Checklists")
     @ApiResponses(
@@ -49,13 +47,7 @@ class ChecklistController {
         val checklists = checklistService.getChecklistByUser(User(username = principal.name))
         val output = ChecklistCollectionOutputModel(
                 checklists.map {
-                    ChecklistOutputModel(
-                            checklistId = it.checklistId,
-                            name = it.checklistName,
-                            description = it.checklistDescription,
-                            completionDate = it.completionDate.toString(),
-                            username = principal.name
-                    )
+                    outputMapper.toChecklistOutput(it, principal.name)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -75,13 +67,7 @@ class ChecklistController {
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-        val output = ChecklistOutputModel(
-                checklistId = checklist.checklistId,
-                name = checklist.checklistName,
-                description = checklist.checklistDescription,
-                completionDate = checklist.completionDate.toString(),
-                username = principal.name
-        )
+        val output = outputMapper.toChecklistOutput(checklist, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -103,13 +89,7 @@ class ChecklistController {
         val output = ItemCollectionOutputModel(
                 checklistId,
                 items.map {
-                    ItemOutputModel(
-                            itemId = it.itemId,
-                            name = it.itemName,
-                            description = it.itemDescription,
-                            state = it.itemState.toString(),
-                            checklistId = checklistId
-                    )
+                    outputMapper.toItemOutput(it, checklistId)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -132,13 +112,7 @@ class ChecklistController {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
         val item = itemServiceImpl.getItemByChecklistAndItemId(checklist, itemId)
-        val output = ItemOutputModel(
-                checklistId = checklistId,
-                itemId = item.itemId,
-                name = item.itemName,
-                description = item.itemDescription,
-                state = item.itemState.name
-        )
+        val output = outputMapper.toItemOutput(item, checklistId)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -153,21 +127,9 @@ class ChecklistController {
             @RequestBody input: ChecklistInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        var checklist = Checklist(
-                checklistName = input.checklistName,
-                checklistDescription = input.checklistDescription,
-                checklistId = input.checklistId,
-                completionDate = input.completionDate,
-                user = User(username = principal.name)
-        )
+        var checklist = inputMapper.toChecklist(input, User(username = principal.name))
         checklist = checklistService.saveChecklist(checklist)
-        val output = ChecklistOutputModel(
-                checklistId = checklist.checklistId,
-                name = checklist.checklistName,
-                description = checklist.checklistDescription,
-                completionDate = checklist.completionDate.toString(),
-                username = principal.name
-        )
+        val output = outputMapper.toChecklistOutput(checklist, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -187,19 +149,9 @@ class ChecklistController {
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-        var item = Item(
-                itemName = input.itemName,
-                itemDescription = input.itemDescription,
-                itemState = State.valueOf(input.itemState),
-                checklist = checklist
-        )
+        var item = inputMapper.toItem(input, checklist)
         item = itemServiceImpl.saveItem(item)
-        val output = ItemOutputModel(
-                checklistId = checklist.checklistId,
-                name = item.itemName,
-                description = item.itemDescription,
-                state = item.itemState.toString()
-        )
+        val output = outputMapper.toItemOutput(item, checklistId)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -216,27 +168,24 @@ class ChecklistController {
     ): ResponseEntity<Entity> {
         val checklists = input.checklists
                 .map {
-                    Checklist(
-                            checklistName = it.checklistName,
-                            checklistDescription = it.checklistDescription,
-                            checklistId = it.checklistId,
-                            user = User(username = principal.name),
-                            items = itemServiceImpl.getItemsByChecklist(
-                                    checklistService.getChecklistByIdAndUser(it.checklistId, User(username = principal.name))
-                                            .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                    val items =
+                            itemServiceImpl.getItemsByChecklist(
+                                    checklistService.getChecklistByIdAndUser(
+                                            it.checklistId,
+                                            User(username = principal.name)
+                                    ).orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
                             ).toMutableSet()
+
+                    inputMapper.toChecklist(
+                            it,
+                            User(username = principal.name),
+                            items
                     )
                 }
         checklistService.saveAllChecklists(checklists.asIterable())
         val output = ChecklistCollectionOutputModel(
                 checklists.map {
-                    ChecklistOutputModel(
-                            checklistId = it.checklistId,
-                            name = it.checklistName,
-                            description = it.checklistDescription,
-                            completionDate = it.completionDate.toString(),
-                            username = principal.name
-                    )
+                    outputMapper.toChecklistOutput(it, principal.name)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -258,23 +207,15 @@ class ChecklistController {
     ): ResponseEntity<Entity> {
         val originalChecklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-        val checklist = Checklist(
-                checklistName = input.checklistName,
-                checklistId = checklistId,
-                checklistDescription = input.checklistDescription,
-                completionDate = input.completionDate,
-                user = User(username = principal.name),
-                items = itemServiceImpl.getItemsByChecklist(originalChecklist).toMutableSet(),
-                template = originalChecklist.template
+        input.checklistId = checklistId
+        val checklist = inputMapper.toChecklist(
+                input,
+                User(username = principal.name),
+                itemServiceImpl.getItemsByChecklist(originalChecklist).toMutableSet(),
+                originalChecklist.template
         )
         checklistService.saveChecklist(checklist)
-        val output = ChecklistOutputModel(
-                checklistId = checklist.checklistId,
-                name = checklist.checklistName,
-                description = checklist.checklistDescription,
-                completionDate = checklist.completionDate.toString(),
-                username = principal.name
-        )
+        val output = outputMapper.toChecklistOutput(checklist, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -297,24 +238,12 @@ class ChecklistController {
         val items = input
                 .items
                 .map {
-                    Item(
-                            itemName = it.itemName,
-                            itemDescription = it.itemDescription,
-                            itemState = State.valueOf(it.itemState),
-                            checklist = checklist,
-                            itemId = it.itemId
-                    )
+                    inputMapper.toItem(it, checklist)
                 }
         val output = ItemCollectionOutputModel(
                 checklistId,
                 items.map {
-                    ItemOutputModel(
-                            itemId = it.itemId,
-                            name = it.itemName,
-                            description = it.itemDescription,
-                            state = it.itemState.toString(),
-                            checklistId = checklistId
-                    )
+                    outputMapper.toItemOutput(it, checklistId)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -338,20 +267,10 @@ class ChecklistController {
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
                 .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
-        var item = Item(
-                itemName = input.itemName,
-                itemDescription = input.itemDescription,
-                itemState = State.valueOf(input.itemState),
-                checklist = checklist,
-                itemId = itemId
-        )
+        input.itemId = itemId
+        var item = inputMapper.toItem(input, checklist)
         item = itemServiceImpl.saveItem(item)
-        val output = ItemOutputModel(
-                checklistId = checklist.checklistId,
-                name = item.itemName,
-                description = item.itemDescription,
-                state = item.itemState.toString()
-        )
+        val output = outputMapper.toItemOutput(item, checklistId)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 

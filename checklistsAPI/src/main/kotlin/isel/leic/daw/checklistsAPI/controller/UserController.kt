@@ -12,7 +12,6 @@ import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.*
 import isel.leic.daw.checklistsAPI.mappers.InputMapper
 import isel.leic.daw.checklistsAPI.mappers.OutputMapper
-import isel.leic.daw.checklistsAPI.outputModel.single.UserOutputModel
 import isel.leic.daw.checklistsAPI.service.UserServiceImpl
 import java.security.Principal
 
@@ -23,8 +22,9 @@ class UserController {
 
     @Autowired
     lateinit var userServiceImpl: UserServiceImpl
-    lateinit var inputMapper: InputMapper
-    lateinit var outputMapper: OutputMapper
+
+    val inputMapper: InputMapper = InputMapper()
+    val outputMapper: OutputMapper = OutputMapper()
 
     @ApiOperation(value = "Returns a Specific User")
     @ApiResponses(
@@ -53,7 +53,7 @@ class UserController {
             @ApiParam(value = "Input that represents the User to be created")
             @RequestBody input: UserInputModel
     ): User {
-        val user = inputMapper.toUser(input)
+        val user = inputMapper.toUser(input= input)
         return userServiceImpl.saveUser(user)
     }
 
@@ -73,15 +73,7 @@ class UserController {
     ): User {
         val currentUser = userServiceImpl.getUser(input.username)
         if (currentUser.username != principal.name) throw AccessDeniedException("Forbidden")
-        val user = User(
-                username = currentUser.username,
-                email = input.email,
-                givenName = input.givenName,
-                familyName = input.familyName,
-                password = input.password,
-                checklists = currentUser.checklists,
-                checklistTemplates = currentUser.checklistTemplates
-        )
+        val user = inputMapper.toUser(input, currentUser.checklists, currentUser.checklistTemplates)
         return userServiceImpl.saveUser(user)
     }
 
