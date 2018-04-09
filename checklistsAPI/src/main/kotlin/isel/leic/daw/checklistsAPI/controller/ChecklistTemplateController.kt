@@ -254,6 +254,7 @@ class ChecklistTemplateController {
                         User(username = principal.name)
                 ).orElseThrow({ AccessDeniedException("No permission granted to access this template") })
         ).toMutableSet()
+        input.checklistTemplateId = checklistTemplateId
         val template = checklistTemplateService.saveTemplate(
                 inputMapper.toChecklistTemplate(
                         input,
