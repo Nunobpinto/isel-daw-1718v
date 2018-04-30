@@ -9,9 +9,13 @@ interface ChecklistService {
 
     fun getChecklistByUser(user: User): List<Checklist>
 
+    fun getChecklistByUserPaginated(user: User, offset: Int, limit: Int): List<Checklist>
+
     fun getChecklistByIdAndUser(checklistId: Long, user: User): Optional<Checklist>
 
     fun getChecklistsByTemplate(checklistTemplate: ChecklistTemplate): List<Checklist>
+
+    fun getChecklistsByTemplatePaginated(checklistTemplate: ChecklistTemplate, offset: Int, limit: Int): List<Checklist>
 
     fun saveChecklist(checklist: Checklist): Checklist
 

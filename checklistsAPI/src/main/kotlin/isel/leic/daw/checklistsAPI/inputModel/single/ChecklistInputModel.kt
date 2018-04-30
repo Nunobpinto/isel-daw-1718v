@@ -11,5 +11,5 @@ class ChecklistInputModel(
         @JsonProperty("completion_date")
         val completionDate: LocalDate,
         @JsonProperty("id")
-        var checklistId: Long
+        var checklistId: Long = -1
 )

@@ -47,10 +47,14 @@ import isel.leic.daw.checklistsAPI.outputModel.single.ChecklistTemplateOutputMod
         ]
 )
 class ChecklistTemplateCollectionOutputModel(
-        checklistTemplates: Collection<ChecklistTemplateOutputModel> = CollectionResource()
+        checklistTemplates: Collection<ChecklistTemplateOutputModel> = CollectionResource(),
+        offset : String = "0",
+        limit : String = "0"
 ) : CollectionResource<ChecklistTemplateOutputModel>() {
     init {
         this.addAll(checklistTemplates)
+        this.offset = offset.toLong()
+        this.limit = limit.toLong()
     }
 
 }

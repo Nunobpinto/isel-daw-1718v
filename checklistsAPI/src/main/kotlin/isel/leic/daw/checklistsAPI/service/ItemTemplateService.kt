@@ -7,6 +7,8 @@ interface ItemTemplateService {
 
     fun getItemsByTemplate(checklistTemplate: ChecklistTemplate): List<ItemTemplate>
 
+    fun getItemsByTemplatePaginated(checklistTemplate: ChecklistTemplate, offset:Int, limit:Int) : List<ItemTemplate>
+
     fun getItemTemplateByIdAndTemplate(checklistTemplate: ChecklistTemplate, itemId: Long): ItemTemplate
 
     fun saveItemTemplate(itemTemplate: ItemTemplate): ItemTemplate

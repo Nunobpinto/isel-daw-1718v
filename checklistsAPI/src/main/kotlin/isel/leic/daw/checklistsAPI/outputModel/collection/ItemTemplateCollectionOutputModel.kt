@@ -53,9 +53,13 @@ import isel.leic.daw.checklistsAPI.outputModel.single.ItemTemplateOutputModel
 )
 class ItemTemplateCollectionOutputModel(
         val templateId: Long = 0,
-        itemTemplates: Collection<ItemTemplateOutputModel> = CollectionResource()
+        itemTemplates: Collection<ItemTemplateOutputModel> = CollectionResource(),
+        offset : String = "0",
+        limit : String = "0"
 ) : CollectionResource<ItemTemplateOutputModel>() {
     init {
         this.addAll(itemTemplates)
+        this.offset = offset.toLong()
+        this.limit = limit.toLong()
     }
 }

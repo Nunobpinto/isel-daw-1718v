@@ -53,9 +53,13 @@ import isel.leic.daw.checklistsAPI.outputModel.single.ItemOutputModel
 )
 class ItemCollectionOutputModel(
         val checklistId: Long = 0,
-        items: Collection<ItemOutputModel> = CollectionResource()
+        items: Collection<ItemOutputModel> = CollectionResource(),
+         limit : String = "0",
+         offset:String ="0"
 ) : CollectionResource<ItemOutputModel>() {
     init {
         this.addAll(items)
+        this.offset = offset.toLong()
+        this.limit = limit.toLong()
     }
 }

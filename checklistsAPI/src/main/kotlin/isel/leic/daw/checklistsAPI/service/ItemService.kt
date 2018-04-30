@@ -9,6 +9,8 @@ interface ItemService {
 
     fun getItemsByChecklist(checklist: Checklist): List<Item>
 
+    fun getItemsByChecklistPaginated(checklist: Checklist, offset:Int, limit:Int): List<Item>
+
     fun saveItem(item: Item): Item
 
     fun deleteAllItemsByChecklist(checklist: Checklist): Long

@@ -8,5 +8,5 @@ class ChecklistTemplateInputModel (
     @JsonProperty("description")
     val checklistTemplateDescription: String,
     @JsonProperty("id")
-    var checklistTemplateId: Long
+    var checklistTemplateId: Long = -1
 )

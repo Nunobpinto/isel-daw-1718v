@@ -10,5 +10,5 @@ class ItemInputModel (
         @JsonProperty("state")
         val itemState: String,
         @JsonProperty("id")
-        var itemId: Long
+        var itemId: Long = -1
 )
