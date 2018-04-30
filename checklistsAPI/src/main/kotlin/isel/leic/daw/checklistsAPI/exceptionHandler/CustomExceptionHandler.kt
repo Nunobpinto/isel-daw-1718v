@@ -137,4 +137,22 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
                 httpHeaders,
                 HttpStatus.CONFLICT)
     }
+
+    @ExceptionHandler(value = [(IllegalArgumentException::class)])
+    fun handleIllegalArgumentException(
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
+        val httpHeaders = HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
+        return ResponseEntity(
+                ErrorOutputModel(
+                        title = "Invalid Syntax",
+                        detail = "Error in request parameters",
+                        status = 400
+                ),
+                httpHeaders,
+                HttpStatus.BAD_REQUEST)
+    }
+
 }
