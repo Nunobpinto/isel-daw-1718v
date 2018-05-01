@@ -52,7 +52,9 @@ class ChecklistTemplateController {
     @GetMapping
     fun getAllTemplates(
             principal: Principal,
+            @ApiParam(value = "Number of elements to skip", required = false)
             @RequestParam(value = "offset", required = false, defaultValue = "0") offset: String,
+            @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
         val user = User(username = principal.name)
@@ -98,7 +100,9 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template where the Items belong", required = true)
             @PathVariable checklistTemplateId: Long,
             principal: Principal,
+            @ApiParam(value = "Number of elements to skip", required = false)
             @RequestParam(value = "offset", required = false, defaultValue = "0") offset: String,
+            @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
         val checklistTemplate = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
