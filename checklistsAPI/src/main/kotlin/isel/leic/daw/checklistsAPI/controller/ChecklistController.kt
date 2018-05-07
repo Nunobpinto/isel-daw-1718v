@@ -44,8 +44,8 @@ class ChecklistController {
     @GetMapping
     fun getAllChecklists(
             principal: Principal,
-            @ApiParam(value = "", required = false)
-            @RequestParam(value = "Number of elements to skip", required = false, defaultValue = "0") offset: String,
+            @ApiParam(value = "Number of elements to skip", required = false)
+            @RequestParam(value = "offset", required = false, defaultValue = "0") offset: String,
             @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
