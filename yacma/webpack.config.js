@@ -14,13 +14,16 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env', 'react']
+            presets: ['env', 'react', 'stage-3']
           }
         }
       }
     ]
   },
   devServer: {
-    port: 9000
+    port: 9000,
+    historyApiFallback: {
+      disableDotRule: true
+    }
   }
 }

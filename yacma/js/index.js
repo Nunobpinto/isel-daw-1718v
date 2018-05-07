@@ -1,11 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import App from './app'
 
-function example () {
-  ReactDOM.render(
-    React.createElement('h1', {}, 'Hello world'),
-    document.getElementById('app')
-  )
-}
-
-example()
+ReactDOM.render(
+  <App />,
+  document.getElementById('app')
+)
