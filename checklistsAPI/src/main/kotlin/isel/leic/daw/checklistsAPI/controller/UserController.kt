@@ -12,16 +12,16 @@ import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.*
 import isel.leic.daw.checklistsAPI.mappers.InputMapper
 import isel.leic.daw.checklistsAPI.mappers.OutputMapper
-import isel.leic.daw.checklistsAPI.service.UserServiceImpl
+import isel.leic.daw.checklistsAPI.service.UserService
 import java.security.Principal
 
 @RestController
-@RequestMapping("/users", produces = [Siren4J.JSON_MEDIATYPE])
+@RequestMapping("/api/users", produces = [Siren4J.JSON_MEDIATYPE])
 @Api(description = "Operations pertaining to Users")
 class UserController {
 
     @Autowired
-    lateinit var userServiceImpl: UserServiceImpl
+    lateinit var userService: UserService
 
     val inputMapper: InputMapper = InputMapper()
     val outputMapper: OutputMapper = OutputMapper()
@@ -37,24 +37,9 @@ class UserController {
             @ApiParam(value = "The username of the User", required = true)
             @PathVariable username: String
     ): ResponseEntity<Entity> {
-        val user = userServiceImpl.getUser(username)
+        val user = userService.getUser(username)
         val output = outputMapper.toUserOutput(user)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
-    }
-
-    @ApiOperation(value = "Creates a New User")
-    @ApiResponses(
-            ApiResponse(code = 201, message = "User created successfully"),
-            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
-            ApiResponse(code = 409, message = "User already exists")
-    )
-    @PostMapping("/register")
-    fun registerUser(
-            @ApiParam(value = "Input that represents the User to be created")
-            @RequestBody input: UserInputModel
-    ): User {
-        val user = inputMapper.toUser(input= input)
-        return userServiceImpl.saveUser(user)
     }
 
     @ApiOperation(value = "Updates Specific User")
@@ -71,10 +56,10 @@ class UserController {
             @RequestBody input: UserInputModel,
             principal: Principal
     ): User {
-        val currentUser = userServiceImpl.getUser(input.username)
+        val currentUser = userService.getUser(input.username)
         if (currentUser.username != principal.name) throw AccessDeniedException("Forbidden")
         val user = inputMapper.toUser(input, currentUser.checklists, currentUser.checklistTemplates)
-        return userServiceImpl.saveUser(user)
+        return userService.saveUser(user)
     }
 
     @ApiOperation(value = "Deletes Specific User")
@@ -90,7 +75,7 @@ class UserController {
             principal: Principal
     ) {
         if (username != principal.name) throw AccessDeniedException("Forbidden")
-        return userServiceImpl.deleteUser(username)
+        return userService.deleteUser(username)
     }
 
 }

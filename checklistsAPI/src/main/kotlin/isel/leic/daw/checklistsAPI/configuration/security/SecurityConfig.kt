@@ -61,7 +61,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .antMatchers("/swagger-ui.html")
                 .antMatchers( "/swagger-resources")
                 .antMatchers( "/webjars/**")
-                .antMatchers("/users/register/**")
+                .antMatchers("/users/register/")
     }
 
 }
