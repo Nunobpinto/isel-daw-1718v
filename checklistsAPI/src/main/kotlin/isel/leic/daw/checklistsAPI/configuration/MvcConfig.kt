@@ -8,9 +8,9 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry
 @Configuration
 class MvcConfig : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
+        registry.addMapping("/api/**")
                 .allowedOrigins("*")
-                .allowedMethods("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE","OPTIONs")
                 .allowedHeaders("*")
     }
 }
