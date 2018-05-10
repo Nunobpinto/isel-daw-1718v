@@ -1,0 +1,49 @@
+import React from 'react'
+import { withRouter, NavLink } from 'react-router-dom'
+import { Layout, Menu, Button } from 'antd'
+import Cookies from 'universal-cookie'
+const cookies = new Cookies()
+
+const { Header } = Layout
+
+export default withRouter(({history}) => (
+  <Layout className='layout'>
+    <Header className='header'>
+      <div className='logo' />
+      <Menu
+        theme='dark'
+        mode='horizontal'
+        style={{ lineHeight: '64px' }}
+      >
+        <Menu.Item as={NavLink} exact to={'/'}>
+          <Button type='default' ghost>
+                YAMCA
+          </Button>
+        </Menu.Item>
+        <Menu.Item>
+          <Button
+            type='default'
+            ghost
+            onClick={() => {
+              cookies.remove('auth')
+              history.push('/')
+            }}
+          >
+                Sign Out
+          </Button>
+        </Menu.Item>
+        <Menu.Item as={NavLink} exact to={'/checklists'}>
+          <Button type='default' ghost>
+                Manage My Checklists
+          </Button>
+        </Menu.Item>
+        <Menu.Item as={NavLink} exact to={'/templates'}>
+          <Button type='default' ghost>
+                See All My Templates
+          </Button>
+        </Menu.Item>
+      </Menu>
+    </Header>
+  </Layout>
+)
+)
