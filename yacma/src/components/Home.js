@@ -34,7 +34,7 @@ export default () => {
               <div>
                 <HttpGetSwitch
                   result={result}
-                  onLoading={() => <div><Spin tip='Loading User HomePage...' /></div>}
+                  onLoading={() => <div><Spin id='spin' tip='Loading User HomePage...' /></div>}
                   onJson={json => (
                     <div>
                       <Avatar size='large' shape='square' icon='user' />

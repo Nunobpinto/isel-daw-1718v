@@ -33,7 +33,10 @@ class LoginForm extends React.Component {
   }
 
   render () {
-    const {redirect} = this.state
+    let {redirect} = this.state
+    if (cookies.get('auth')) {
+      redirect = true
+    }
     if (redirect === true) {
       const cookie = cookies.get('auth')
       const header = {

@@ -16,7 +16,12 @@ export default withRouter(({history}) => (
         style={{ lineHeight: '64px' }}
       >
         <Menu.Item as={NavLink} exact to={'/'}>
-          <Button type='default' ghost>
+          <Button
+            type='default'
+            ghost
+            onClick={() => {
+              history.push('/')
+            }}>
                 YAMCA
           </Button>
         </Menu.Item>
@@ -25,20 +30,28 @@ export default withRouter(({history}) => (
             type='default'
             ghost
             onClick={() => {
-              cookies.remove('auth')
-              history.push('/')
+              history.push('/logout')
             }}
           >
                 Sign Out
           </Button>
         </Menu.Item>
         <Menu.Item as={NavLink} exact to={'/checklists'}>
-          <Button type='default' ghost>
+          <Button
+            type='default' ghost
+            onClick={() => {
+              history.push('/checklists')
+            }}t>
                 Manage My Checklists
           </Button>
         </Menu.Item>
         <Menu.Item as={NavLink} exact to={'/templates'}>
-          <Button type='default' ghost>
+          <Button
+            type='default'
+            ghost
+            onClick={() => {
+              history.push('/templates')
+            }}>
                 See All My Templates
           </Button>
         </Menu.Item>
