@@ -15,7 +15,6 @@ import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.service.UserService
 import java.security.Principal
 
-@CrossOrigin
 @RestController
 @RequestMapping("/api/users", produces = [Siren4J.JSON_MEDIATYPE])
 @Api(description = "Operations pertaining to Users")

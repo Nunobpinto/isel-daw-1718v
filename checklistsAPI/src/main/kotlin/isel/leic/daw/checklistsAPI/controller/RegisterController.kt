@@ -9,10 +9,7 @@ import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.model.User
 import isel.leic.daw.checklistsAPI.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/user/register", produces = [Siren4J.JSON_MEDIATYPE])
@@ -23,7 +20,6 @@ class RegisterController {
     lateinit var userService: UserService
 
     val inputMapper: InputMapper = InputMapper()
-    val outputMapper: OutputMapper = OutputMapper()
 
     @ApiOperation(value = "Creates a New User")
     @ApiResponses(
