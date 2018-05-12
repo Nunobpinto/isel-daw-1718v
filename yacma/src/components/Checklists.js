@@ -33,22 +33,30 @@ export default () => {
                 <HttpGetSwitch
                   result={result}
                   onLoading={() => <div><Spin id='spin' tip='Loading Checklists...' /></div>}
-                  onJson={json => (
-                    <ul>
-                      {
-                        json.entities.map(
-                          item =>
-                            <li key={item.properties.checklistId}>
-                              <Link to={{
-                                pathname: `checklists/${item.properties.checklistId}`
-                              }}>
-                                {`${item.properties.name}`}</Link>
-                            </li>
-                        )
-                      }
-                    </ul>
-                  )}
-                />
+                  onJson={json => {
+                    if (json.entities) {
+                      return (
+                        <ul>
+                          {
+                            json.entities.map(
+                              item =>
+                                <li key={item.properties.checklistId}>
+                                  <Link to={{
+                                    pathname: `checklists/${item.properties.checklistId}`
+                                  }}>
+                                    {`${item.properties.name}`}</Link>
+                                </li>
+                            )
+                          }
+                        </ul>
+                      )
+                    }
+                    return (
+                      <div>
+                        <h1>No Checklists yet</h1>
+                      </div>
+                    )
+                  }} />
               </div>
             )} />
         </div>

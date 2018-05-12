@@ -9,6 +9,7 @@ import Checklists from './components/Checklists'
 import Templates from './components/Templates'
 import Checklist from './components/Checklist'
 import Template from './components/Template'
+import Item from './components/Item'
 
 export default () => (
   <BrowserRouter>
@@ -19,7 +20,7 @@ export default () => (
       <ProtectedRoute exact path='/' component={Home} />
       <ProtectedRoute exact path='/checklists' component={Checklists} />
       <ProtectedRoute exact path='/checklists/:checklistId' component={Checklist} />
-      <ProtectedRoute exact path='/checklists/:checklistId/items/:itemId' component={Home} />
+      <ProtectedRoute exact path='/checklists/:checklistId/items/:itemId' component={Item} />
       <ProtectedRoute exact path='/templates' component={Templates} />
       <ProtectedRoute exact path='/templates/:templateId' component={Template} />
       <ProtectedRoute exact path='/templates/:templateId/items/:itemId' component={Home} />

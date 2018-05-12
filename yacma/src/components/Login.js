@@ -13,7 +13,9 @@ class LoginForm extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      redirect: false
+      redirect: false,
+      username: '',
+      password: ''
     }
     this.handleSubmit = this.handleSubmit.bind(this)
   }
@@ -22,10 +24,9 @@ class LoginForm extends React.Component {
     e.preventDefault()
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        const authString = `${values.username}:${values.password}`
-        const encoded = window.btoa(authString)
-        cookies.set('auth', encoded)
         this.setState(() => ({
+          username: values.username,
+          password: values.password,
           redirect: true
         }))
       }
@@ -35,20 +36,19 @@ class LoginForm extends React.Component {
   render () {
     let {redirect} = this.state
     if (cookies.get('auth')) {
-      redirect = true
+      return (<Redirect to='' />)
     }
     if (redirect === true) {
-      const cookie = cookies.get('auth')
+      const authString = `${this.state.username}:${this.state.password}`
+      const encoded = window.btoa(authString)
       const header = {
         method: 'GET',
         headers: {
-          'Authorization': `Basic ${cookie}`,
+          'Authorization': `Basic ${encoded}`,
           'Access-Control-Allow-Origin': '*'
         }
       }
-      const decoded = window.atob(cookie)
-      const username = decoded.split(':')[0]
-      const url = config.API_PATH + 'api/users/' + username
+      const url = config.API_PATH + 'api/users/' + this.state.username
       return (
         <HttpGet
           url={url}
@@ -58,9 +58,12 @@ class LoginForm extends React.Component {
               <HttpGetSwitch
                 result={result}
                 onLoading={() => <div><Spin id='spin' tip='Checking user credentials...' /></div>}
-                onJson={json => (
-                  <Redirect to='/' />
-                )}
+                onJson={json => {
+                  cookies.set('auth', encoded)
+                  this.setState({redirect: false})
+                  return (<Redirect to='/' />)
+                }
+                }
                 onError={_ => (
                   <div>
                     <p> Error Logging In</p>

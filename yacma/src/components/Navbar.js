@@ -1,8 +1,6 @@
 import React from 'react'
 import { withRouter, NavLink } from 'react-router-dom'
 import { Layout, Menu, Button } from 'antd'
-import Cookies from 'universal-cookie'
-const cookies = new Cookies()
 
 const { Header } = Layout
 
