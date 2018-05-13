@@ -1,5 +1,5 @@
 import React from 'react'
-import {Form, Input, Button, Spin} from 'antd'
+import {message, Form, Input, Button, Spin} from 'antd'
 import logo from '../logo.svg'
 import '../App.css'
 import 'antd/lib/button/style/css'
@@ -61,7 +61,7 @@ class RegisterForm extends React.Component {
           'Content-Type': 'application/json'
         }
       }
-      const url = config.API_PATH + 'user/register'
+      const url = config.API_PATH + '/user/register'
       return (
         <HttpGet
           url={url}
@@ -82,14 +82,11 @@ class RegisterForm extends React.Component {
                   )
                 }
                 }
-                onError={_ => (
-                  <div>
-                    <p> Error in Register </p>
-                    <Button onClick={() => { this.setState({redirect: false}) }}>
-                      Try Again
-                    </Button>
-                  </div>
-                )}
+                onError={_ => {
+                  message.error('Error in register, try again!')
+                  this.setState({redirect: false})
+                  return null
+                }}
               />
             </div>
           )} />

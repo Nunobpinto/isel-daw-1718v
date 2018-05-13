@@ -1,5 +1,6 @@
 import React from 'react'
 import Navbar from './Navbar'
+import CreateChecklist from './CreateChecklist'
 import config from '../config'
 import HttpGet from './http-get'
 import HttpGetSwitch from './http-get-switch'
@@ -18,7 +19,7 @@ export default () => {
     }
   }
 
-  const url = config.API_PATH + 'api/checklists'
+  const url = config.API_PATH + '/api/checklists'
   return (
     <div>
       <div>
@@ -36,24 +37,28 @@ export default () => {
                   onJson={json => {
                     if (json.entities) {
                       return (
-                        <ul>
-                          {
-                            json.entities.map(
-                              item =>
-                                <li key={item.properties.checklistId}>
-                                  <Link to={{
-                                    pathname: `checklists/${item.properties.checklistId}`
-                                  }}>
-                                    {`${item.properties.name}`}</Link>
-                                </li>
-                            )
-                          }
-                        </ul>
+                        <div>
+                          <ul>
+                            {
+                              json.entities.map(
+                                item =>
+                                  <li key={item.properties.checklistId}>
+                                    <Link to={{
+                                      pathname: `checklists/${item.properties.checklistId}`
+                                    }}>
+                                      {`${item.properties.name}`}</Link>
+                                  </li>
+                              )
+                            }
+                          </ul>
+                          <CreateChecklist url={json.actions[1].href} />
+                        </div>
                       )
                     }
                     return (
                       <div>
                         <h1>No Checklists yet</h1>
+                        <CreateChecklist url={json.actions[1]} />
                       </div>
                     )
                   }} />

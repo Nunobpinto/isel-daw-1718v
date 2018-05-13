@@ -6,14 +6,15 @@ import HttpGetSwitch from './http-get-switch'
 import Cookies from 'universal-cookie'
 import { Link } from 'react-router-dom'
 import { Spin } from 'antd'
+import CreateItem from './CreateItem'
 const cookies = new Cookies()
 
 export default class extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.props = props
   }
-  render() {
+  render () {
     const encoded = cookies.get('auth')
     const header = {
       method: 'GET',
@@ -24,7 +25,7 @@ export default class extends React.Component {
     }
     const path = this.props.location.pathname
     const checklistId = path.split('/')[2]
-    const url = config.API_PATH + 'api/checklists/' + checklistId
+    const url = config.API_PATH + '/api/checklists/' + checklistId
     return (
       <div>
         <div>
@@ -57,14 +58,14 @@ export default class extends React.Component {
                               <HttpGetSwitch
                                 result={result}
                                 onLoading={() => <div><Spin id='spin' tip='Loading Items...' /></div>}
-                                onJson={json => {
-                                  if (json.entities) {
+                                onJson={resp => {
+                                  if (resp.entities) {
                                     return (
                                       <div>
                                         <h1>Items :</h1>
                                         <ul>
                                           {
-                                            json.entities.map(
+                                            resp.entities.map(
                                               item =>
                                                 <li key={item.properties.itemId}>
                                                   <Link to={{
@@ -75,12 +76,14 @@ export default class extends React.Component {
                                             )
                                           }
                                         </ul>
+                                        <CreateItem url={json.entities[1].href} />
                                       </div>
                                     )
                                   }
                                   return (
                                     <div>
                                       <h1>No Items yet</h1>
+                                      <CreateItem url={json.entities[1].href} />
                                     </div>
                                   )
                                 }} />

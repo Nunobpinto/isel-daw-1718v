@@ -6,6 +6,7 @@ import HttpGetSwitch from './http-get-switch'
 import Cookies from 'universal-cookie'
 import {Link} from 'react-router-dom'
 import {Spin} from 'antd'
+import CreateTemplate from './CreateTemplate'
 const cookies = new Cookies()
 
 export default () => {
@@ -18,7 +19,7 @@ export default () => {
     }
   }
 
-  const url = config.API_PATH + 'api/templates'
+  const url = config.API_PATH + '/api/templates'
   return (
     <div>
       <div>
@@ -36,25 +37,29 @@ export default () => {
                   onJson={json => {
                     if (json.entities) {
                       return (
-                        <ul>
-                          {
-                            json.entities.map(
-                              item =>
-                                <li key={item.properties.templateId}>
-                                  <Link to={{
-                                    pathname: `templates/${item.properties.templateId}`
-                                  }}>
-                                    {`${item.properties.name}`}</Link>
+                        <div>
+                          <ul>
+                            {
+                              json.entities.map(
+                                item =>
+                                  <li key={item.properties.templateId}>
+                                    <Link to={{
+                                      pathname: `templates/${item.properties.templateId}`
+                                    }}>
+                                      {`${item.properties.name}`}</Link>
 
-                                </li>
-                            )
-                          }
-                        </ul>
+                                  </li>
+                              )
+                            }
+                          </ul>
+                          <CreateTemplate url={json.actions[1].href} />
+                        </div>
                       )
                     }
                     return (
                       <div>
                         <h1>No Templates yet</h1>
+                        <CreateTemplate url={json.actions[1].href} />
                       </div>
                     )
                   }}

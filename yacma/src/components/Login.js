@@ -1,6 +1,6 @@
 import React from 'react'
 import {Redirect, Link} from 'react-router-dom'
-import {Form, Input, Button, Icon, Spin} from 'antd'
+import {message, Form, Input, Button, Icon, Spin} from 'antd'
 import logo from '../logo.svg'
 import 'antd/dist/antd.css'
 import config from '../config'
@@ -48,7 +48,7 @@ class LoginForm extends React.Component {
           'Access-Control-Allow-Origin': '*'
         }
       }
-      const url = config.API_PATH + 'api/users/' + this.state.username
+      const url = config.API_PATH + '/api/users/' + this.state.username
       return (
         <HttpGet
           url={url}
@@ -64,15 +64,13 @@ class LoginForm extends React.Component {
                   return (<Redirect to='/' />)
                 }
                 }
-                onError={_ => (
-                  <div>
-                    <p> Error Logging In</p>
-                    {this.setState({redirect: false})}
-                    <Button>
-                      <Link to='/login'>Try Again</Link>
-                    </Button>
-                  </div>
-                )}
+                onError={_ => {
+                  message.error('Error in login, try again!')
+                  this.setState({redirect: false})
+                  return null
+                }
+
+                }
               />
             </div>
           )} />

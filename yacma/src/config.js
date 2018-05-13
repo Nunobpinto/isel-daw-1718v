@@ -1,5 +1,5 @@
 export default {
-  API_PATH: 'http://localhost:8080/',
+  API_PATH: 'http://localhost:8080',
   CHECKLIST_LIST: '/checklists',
   CHECKLIST_DETAIL: '/checklists/:checklist',
   CHECKLIST_ITEMS: '/checklists/:checklist/items',

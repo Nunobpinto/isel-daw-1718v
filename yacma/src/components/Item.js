@@ -8,11 +8,11 @@ import { Spin } from 'antd'
 const cookies = new Cookies()
 
 export default class extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.props = props
   }
-  render() {
+  render () {
     const encoded = cookies.get('auth')
     const header = {
       method: 'GET',
@@ -24,7 +24,7 @@ export default class extends React.Component {
     const path = this.props.location.pathname
     const checklistId = path.split('/')[2]
     const itemId = path.split('/')[4]
-    const url = config.API_PATH + 'api/checklists/' + checklistId + '/items/' + itemId
+    const url = config.API_PATH + '/api/checklists/' + checklistId + '/items/' + itemId
     return (
       <div>
         <div>
