@@ -4,15 +4,15 @@ import config from '../config'
 import HttpGet from './http-get'
 import HttpGetSwitch from './http-get-switch'
 import Cookies from 'universal-cookie'
-import {Spin} from 'antd'
+import { Spin } from 'antd'
 const cookies = new Cookies()
 
 export default class extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.props = props
   }
-  render () {
+  render() {
     const encoded = cookies.get('auth')
     const header = {
       method: 'GET',
@@ -44,6 +44,11 @@ export default class extends React.Component {
                         <h1><strong>Name</strong> : {json.properties.name}</h1>
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
                         <h1><strong>State</strong> : {json.properties.state}</h1>
+                      </div>
+                    )}
+                    onError={_ => (
+                      <div>
+                        <h1>Error getting the Item, maybe it doesn't exist or you don't have permission to see it !! </h1>
                       </div>
                     )} />
                 </div>)} />

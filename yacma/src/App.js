@@ -23,7 +23,7 @@ export default () => (
       <ProtectedRoute exact path='/checklists/:checklistId/items/:itemId' component={Item} />
       <ProtectedRoute exact path='/templates' component={Templates} />
       <ProtectedRoute exact path='/templates/:templateId' component={Template} />
-      <ProtectedRoute exact path='/templates/:templateId/items/:itemId' component={Home} />
+      <ProtectedRoute exact path='/templates/:templateId/items/:itemId' component={Item} />
     </Switch>
   </BrowserRouter>
 )

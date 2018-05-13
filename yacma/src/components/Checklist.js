@@ -4,16 +4,16 @@ import config from '../config'
 import HttpGet from './http-get'
 import HttpGetSwitch from './http-get-switch'
 import Cookies from 'universal-cookie'
-import {Link} from 'react-router-dom'
-import {Spin} from 'antd'
+import { Link } from 'react-router-dom'
+import { Spin } from 'antd'
 const cookies = new Cookies()
 
 export default class extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.props = props
   }
-  render () {
+  render() {
     const encoded = cookies.get('auth')
     const header = {
       method: 'GET',
@@ -39,6 +39,11 @@ export default class extends React.Component {
                   <HttpGetSwitch
                     result={result}
                     onLoading={() => <div><Spin id='spin' tip='Loading Checklist...' /></div>}
+                    onError={_ => (
+                      <div>
+                        <h1>Error getting the List, maybe it doesn't exist or you don't have permission to see it !! </h1>
+                      </div>
+                    )}
                     onJson={json => (
                       <div>
                         <h1><strong>Name</strong> : {json.properties.name}</h1>

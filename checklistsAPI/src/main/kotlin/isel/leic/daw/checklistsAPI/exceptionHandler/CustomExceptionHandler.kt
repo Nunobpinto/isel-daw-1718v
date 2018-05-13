@@ -6,6 +6,7 @@ import isel.leic.daw.checklistsAPI.exceptions.NotFoundException
 import isel.leic.daw.checklistsAPI.exceptions.UnauthenticatedException
 import isel.leic.daw.checklistsAPI.outputModel.error.ErrorOutputModel
 import org.hibernate.HibernateException
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -153,6 +154,23 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
                 ),
                 httpHeaders,
                 HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(value = [(EmptyResultDataAccessException::class)])
+    fun handleEmptyDataException(
+            ex: Exception,
+            request: WebRequest
+    ): ResponseEntity<ErrorOutputModel> {
+        val httpHeaders = HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_PROBLEM_JSON_UTF8
+        return ResponseEntity(
+                ErrorOutputModel(
+                        title = "Not Found",
+                        detail = "Could not find the resource you wanted",
+                        status = 404
+                ),
+                httpHeaders,
+                HttpStatus.NOT_FOUND)
     }
 
 }
