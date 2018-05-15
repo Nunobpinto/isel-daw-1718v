@@ -69,7 +69,7 @@ export default class extends React.Component {
                                               item =>
                                                 <li key={item.properties.itemId}>
                                                   <Link to={{
-                                                    pathname: `/templates/${item.properties.templateId}/items/${item.properties.itemId}`
+                                                    pathname: `/templates/${item.properties.templateId}/items/${item.properties.itemTemplateId}`
                                                   }}>
                                                     {`${item.properties.name}`}</Link>
                                                 </li>
