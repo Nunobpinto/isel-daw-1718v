@@ -59,7 +59,7 @@ class LoginForm extends React.Component {
                 result={result}
                 onLoading={() => <div><Spin id='spin' tip='Checking user credentials...' /></div>}
                 onJson={json => {
-                  cookies.set('auth', encoded)
+                  cookies.set('auth', encoded, {maxAge: 99999})
                   this.setState({redirect: false})
                   return (<Redirect to='/' />)
                 }
