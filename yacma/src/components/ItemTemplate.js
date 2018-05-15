@@ -24,7 +24,7 @@ export default class extends React.Component {
     const path = this.props.location.pathname
     const checklistId = path.split('/')[2]
     const itemId = path.split('/')[4]
-    const url = config.API_PATH + '/api/templates/' + checklistId + '/items/' + itemId
+    const url = config.API.PATH + '/api/templates/' + checklistId + '/items/' + itemId
     return (
       <div>
         <div>

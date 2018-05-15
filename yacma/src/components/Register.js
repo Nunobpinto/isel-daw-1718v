@@ -61,7 +61,7 @@ class RegisterForm extends React.Component {
           'Content-Type': 'application/json'
         }
       }
-      const url = config.API_PATH + '/user/register'
+      const url = config.API.PATH + '/user/register'
       return (
         <HttpGet
           url={url}

@@ -20,7 +20,7 @@ export default () => {
   console.log(encoded)
   const decoded = window.atob(encoded)
   const username = decoded.split(':')[0]
-  const url = config.API_PATH + '/api/users/' + username
+  const url = config.API.PATH + '/api/users/' + username
   return (
     <div>
       <div>

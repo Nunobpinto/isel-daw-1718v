@@ -10,21 +10,21 @@ import Templates from './components/Templates'
 import Checklist from './components/Checklist'
 import Template from './components/Template'
 import Item from './components/Item'
-import ItemTemplate from './components/ItemTemplate'
+import config from './config'
 
 export default () => (
   <BrowserRouter>
     <Switch>
       <Route exact path='/login' render={props => <Login {...props} />} />
       <Route path='/register' render={props => <Register {...props} />} />
-      <ProtectedRoute exact path='/logout' component={Logout} />
-      <ProtectedRoute exact path='/' component={Home} />
-      <ProtectedRoute exact path='/checklists' component={Checklists} />
-      <ProtectedRoute exact path='/checklists/:checklistId' component={Checklist} />
-      <ProtectedRoute exact path='/checklists/:checklistId/items/:itemId' component={Item} />
-      <ProtectedRoute exact path='/templates' component={Templates} />
-      <ProtectedRoute exact path='/templates/:templateId' component={Template} />
-      <ProtectedRoute exact path='/templates/:templateId/items/:itemId' component={ItemTemplate} />
+      <ProtectedRoute exact path={config.APP.URI_LOGOUT} component={Logout} />
+      <ProtectedRoute exact path={config.APP.URI_HOME} component={Home} />
+      <ProtectedRoute exact path={config.APP.URI_CHECKLIST_ALL} component={Checklists} />
+      <ProtectedRoute exact path={config.APP.URI_CHECKLIST_DETAIL} component={Checklist} />
+      <ProtectedRoute exact path={config.APP.URI_CHECKLIST_ITEM_DETAIL} component={Item} />
+      <ProtectedRoute exact path={config.APP.URI_TEMPLATE_ALL} component={Templates} />
+      <ProtectedRoute exact path={config.APP.URI_TEMPLATE_DETAIL} component={Template} />
+      <ProtectedRoute exact path={config.APP.URI_TEMPLATE_ITEM_DETAIL} component={Item} />
     </Switch>
   </BrowserRouter>
 )

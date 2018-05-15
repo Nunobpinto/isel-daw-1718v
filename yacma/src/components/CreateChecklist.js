@@ -49,7 +49,7 @@ export default class extends React.Component {
         description: state.description,
         completion_date: state.date
       }
-      const path = config.API_PATH + this.state.url
+      const path = config.API.PATH + this.state.url
       const encoded = cookies.get('auth')
       const header = {
         method: 'POST',

@@ -48,7 +48,7 @@ class LoginForm extends React.Component {
           'Access-Control-Allow-Origin': '*'
         }
       }
-      const url = config.API_PATH + '/api/users/' + this.state.username
+      const url = config.API.PATH + '/api/users/' + this.state.username
       return (
         <HttpGet
           url={url}

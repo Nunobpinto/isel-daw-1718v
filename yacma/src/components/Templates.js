@@ -19,7 +19,7 @@ export default () => {
     }
   }
 
-  const url = config.API_PATH + '/api/templates'
+  const url = config.API.PATH + '/api/templates'
   return (
     <div>
       <div>

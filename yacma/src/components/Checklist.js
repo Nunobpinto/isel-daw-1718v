@@ -25,7 +25,7 @@ export default class extends React.Component {
     }
     const path = this.props.location.pathname
     const checklistId = path.split('/')[2]
-    const url = config.API_PATH + '/api/checklists/' + checklistId
+    const url = config.API.PATH + '/api/checklists/' + checklistId
     return (
       <div>
         <div>
@@ -51,7 +51,7 @@ export default class extends React.Component {
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
                         <h1><strong>Completion Date</strong> : {json.properties.completionDate}</h1>
                         <HttpGet
-                          url={config.API_PATH + json.entities.find((entity) => entity.class.includes('items')).href}
+                          url={config.API.PATH + json.entities.find((entity) => entity.class.includes('items')).href}
                           headers={header}
                           render={(result) => (
                             <div>

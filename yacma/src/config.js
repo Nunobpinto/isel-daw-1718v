@@ -1,11 +1,17 @@
 export default {
-  API_PATH: 'http://localhost:8080',
-  CHECKLIST_LIST: '/checklists',
-  CHECKLIST_DETAIL: '/checklists/:checklist',
-  CHECKLIST_ITEMS: '/checklists/:checklist/items',
-  CHECKLIST_ITEM_DETAIL: '/checklists/:checklist/items/:item',
-  TEMPLATE_LIST: '/templates',
-  TEMPLATE_DETAIL: '/templates/:template',
-  TEMPLATE_ITEMS: '/templates/:template/items',
-  TEMPLATE_ITEM_DETAIL: '/templates/:template/items/:item'
+  APP: {
+    URI_CHECKLIST_ALL: '/checklists',
+    URI_CHECKLIST_DETAIL: '/checklists/:checklistId',
+    URI_CHECKLIST_ITEMS: '/checklists/:checklistId/items',
+    URI_CHECKLIST_ITEM_DETAIL: '/checklists/:checklistId/items/:itemId',
+    URI_TEMPLATE_ALL: '/templates',
+    URI_TEMPLATE_DETAIL: '/templates/:templateId',
+    URI_TEMPLATE_ITEMS: '/templates/:templateId/items',
+    URI_TEMPLATE_ITEM_DETAIL: '/templates/:templateId/items/:itemId',
+    URI_LOGOUT: '/LOGOUT',
+    URI_HOME: '/'
+  },
+  API: {
+    PATH: 'http://localhost:8080'
+  }
 }

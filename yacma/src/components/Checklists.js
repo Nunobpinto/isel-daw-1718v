@@ -19,7 +19,7 @@ export default () => {
     }
   }
 
-  const url = config.API_PATH + '/api/checklists'
+  const url = config.API.PATH + '/api/checklists'
   return (
     <div>
       <div>

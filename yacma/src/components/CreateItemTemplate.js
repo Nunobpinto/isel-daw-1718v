@@ -48,7 +48,7 @@ export default class extends React.Component {
         description: values.description,
         state: values.state
       }
-      const path = config.API_PATH + this.state.url
+      const path = config.API.PATH + this.state.url
       const encoded = cookies.get('auth')
       const header = {
         method: 'POST',

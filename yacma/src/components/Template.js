@@ -25,7 +25,7 @@ export default class extends React.Component {
     }
     const path = this.props.location.pathname
     const templateId = path.split('/')[2]
-    const url = config.API_PATH + '/api/templates/' + templateId
+    const url = config.API.PATH + '/api/templates/' + templateId
     return (
       <div>
         <div>
@@ -51,7 +51,7 @@ export default class extends React.Component {
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
                         <h1><strong>State</strong> : {json.properties.state}</h1>
                         <HttpGet
-                          url={config.API_PATH + json.entities.find((entity) => entity.class.includes('item-templates')).href}
+                          url={config.API.PATH + json.entities.find((entity) => entity.class.includes('item-templates')).href}
                           headers={header}
                           render={(result) => (
                             <div>
