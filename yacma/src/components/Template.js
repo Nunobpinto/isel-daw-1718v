@@ -51,7 +51,7 @@ export default class extends React.Component {
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
                         <h1><strong>State</strong> : {json.properties.state}</h1>
                         <HttpGet
-                          url={config.API_PATH + json.entities[1].href}
+                          url={config.API_PATH + json.entities.find((entity) => entity.class.includes('item-templates')).href}
                           headers={header}
                           render={(result) => (
                             <div>
@@ -76,14 +76,14 @@ export default class extends React.Component {
                                             )
                                           }
                                         </ul>
-                                        <CreateItemTemplate url={json.entities[1].href} />
+                                        <CreateItemTemplate url={json.entities.find((entity) => entity.class.includes('item-templates')).href} />
                                       </div>
                                     )
                                   }
                                   return (
                                     <div>
                                       <h1>No Items yet</h1>
-                                      <CreateItemTemplate url={json.entities[1].href} />
+                                      <CreateItemTemplate url={json.entities.find((entity) => entity.class.includes('item-templates')).href} />
                                     </div>
                                   )
                                 }} />
