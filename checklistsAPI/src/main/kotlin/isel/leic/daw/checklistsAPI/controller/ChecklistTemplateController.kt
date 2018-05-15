@@ -19,6 +19,7 @@ import isel.leic.daw.checklistsAPI.service.ChecklistService
 import isel.leic.daw.checklistsAPI.service.ChecklistTemplateService
 import isel.leic.daw.checklistsAPI.service.ItemService
 import isel.leic.daw.checklistsAPI.service.ItemTemplateService
+import javassist.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
@@ -84,7 +85,7 @@ class ChecklistTemplateController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val output = outputMapper.toChecklistTemplateOutput(template, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
@@ -106,7 +107,7 @@ class ChecklistTemplateController {
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
         val checklistTemplate = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist")})
         val itemTemplates: List<ItemTemplate>
         itemTemplates = if (offset == "0" && limit == "0") itemTemplateService.getItemsByTemplate(checklistTemplate)
         else itemTemplateService.getItemsByTemplatePaginated(checklistTemplate, offset.toInt(), limit.toInt())
@@ -136,7 +137,7 @@ class ChecklistTemplateController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist")})
         val itemTemplate = itemTemplateService.getItemTemplateByIdAndTemplate(template, itemId)
         val output = outputMapper.toItemTemplateOutput(itemTemplate, checklistTemplateId)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -179,7 +180,7 @@ class ChecklistTemplateController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist")})
         val checklist = checklistService.saveChecklist(
                 inputMapper.toChecklist(
                         input = input,
@@ -219,7 +220,7 @@ class ChecklistTemplateController {
         val template = checklistTemplateService.getTemplateByIdAndUser(
                 checklistTemplateId,
                 User(username = principal.name)
-        ).orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+        ).orElseThrow({ NotFoundException("The resource doesn't exist") })
 
         val itemTemplate = itemTemplateService.saveItemTemplate(
                 inputMapper.toItemTemplate(input, template))
@@ -248,7 +249,7 @@ class ChecklistTemplateController {
                                     checklistTemplateService.getTemplateByIdAndUser(
                                             it.checklistTemplateId,
                                             User(username = principal.name)
-                                    ).orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                                    ).orElseThrow({ NotFoundException("The resource doesn't exist") })
                             ).toMutableSet())
                 }
         checklistTemplateService.saveAllTemplates(templates.asIterable())
@@ -278,7 +279,7 @@ class ChecklistTemplateController {
                 checklistTemplateService.getTemplateByIdAndUser(
                         checklistTemplateId,
                         User(username = principal.name)
-                ).orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                ).orElseThrow({ NotFoundException("The resource doesn't exist") })
         ).toMutableSet()
         input.checklistTemplateId = checklistTemplateId
         val template = checklistTemplateService.saveTemplate(
@@ -307,7 +308,7 @@ class ChecklistTemplateController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val itemTemplates =
                 input
                         .itemTemplates
@@ -341,7 +342,7 @@ class ChecklistTemplateController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         input.itemTemplateId = itemId
         val itemTemplate = inputMapper.toItemTemplate(input, template)
         itemTemplateService.saveItemTemplate(itemTemplate)
@@ -371,7 +372,7 @@ class ChecklistTemplateController {
     ) {
         val checklists: List<Checklist> = checklistService.getChecklistsByTemplate(
                 checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                        .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                        .orElseThrow({ NotFoundException("The resource doesn't exist") })
         )
         if (checklists.isNotEmpty()) {
             checklists.forEach { it.template = null }
@@ -395,7 +396,7 @@ class ChecklistTemplateController {
             checklistTemplateService.getTemplateByIdAndUser(
                     checklistTemplateId,
                     User(username = principal.name)
-            ).orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+            ).orElseThrow({ NotFoundException("The resource doesn't exist") })
     )
 
     @ApiOperation(value = "Deletes specific Item from a Template")
@@ -413,7 +414,7 @@ class ChecklistTemplateController {
             principal: Principal
     ) = itemTemplateService.deleteItemByIdAndTemplate(
             checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(username = principal.name))
-                    .orElseThrow({ AccessDeniedException("No permission granted to access this template") })
+                    .orElseThrow({ NotFoundException("The resource doesn't exist") })
             , itemTemplateId)
 
 }

@@ -16,6 +16,7 @@ import isel.leic.daw.checklistsAPI.outputModel.collection.ItemCollectionOutputMo
 import isel.leic.daw.checklistsAPI.service.ChecklistService
 import isel.leic.daw.checklistsAPI.service.ItemService
 import isel.leic.daw.checklistsAPI.service.ItemServiceImpl
+import javassist.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
@@ -76,7 +77,7 @@ class ChecklistController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val output = outputMapper.toChecklistOutput(checklist, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
@@ -98,7 +99,7 @@ class ChecklistController {
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val items: List<Item>
         items = if (offset == "0" && limit == "0") itemService.getItemsByChecklist(checklist)
         else itemService.getItemsByChecklistPaginated(checklist, offset.toInt(), limit.toInt())
@@ -128,7 +129,7 @@ class ChecklistController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val item = itemService.getItemByChecklistAndItemId(checklist, itemId)
         val output = outputMapper.toItemOutput(item, checklistId)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -166,7 +167,7 @@ class ChecklistController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         var item = inputMapper.toItem(input, checklist)
         item = itemService.saveItem(item)
         val output = outputMapper.toItemOutput(item, checklistId)
@@ -191,7 +192,7 @@ class ChecklistController {
                                     checklistService.getChecklistByIdAndUser(
                                             it.checklistId!!,
                                             User(username = principal.name)
-                                    ).orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                                    ).orElseThrow({ NotFoundException("The resource doesn't exist") })
                             ).toMutableSet()
 
                     inputMapper.toChecklist(
@@ -224,7 +225,7 @@ class ChecklistController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val originalChecklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         input.checklistId = checklistId
         val checklist = inputMapper.toChecklist(
                 input,
@@ -252,7 +253,7 @@ class ChecklistController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val items = input
                 .items
                 .map {
@@ -284,7 +285,7 @@ class ChecklistController {
             principal: Principal
     ): ResponseEntity<Entity> {
         val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                .orElseThrow({ NotFoundException("The resource doesn't exist") })
         input.itemId = itemId
         var item = inputMapper.toItem(input, checklist)
         item = itemService.saveItem(item)
@@ -325,7 +326,7 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             principal: Principal
     ) = itemService.deleteAllItemsByChecklist(checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-            .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") }))
+            .orElseThrow({ NotFoundException("The resource doesn't exist") }))
 
     @ApiOperation(value = "Deletes specific Item from a Checklist")
     @ApiResponses(
@@ -342,7 +343,7 @@ class ChecklistController {
             principal: Principal
     ) = itemService.deleteItemByIdAndChecklist(
             checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
-                    .orElseThrow({ AccessDeniedException("No permission granted to access this checklist") })
+                    .orElseThrow({ NotFoundException("The resource doesn't exist") })
             , itemId
     )
 
