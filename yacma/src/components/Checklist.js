@@ -5,7 +5,8 @@ import HttpGet from './http-get'
 import HttpGetSwitch from './http-get-switch'
 import Cookies from 'universal-cookie'
 import { Link } from 'react-router-dom'
-import { Spin } from 'antd'
+import { Spin, Button, message, Tooltip } from 'antd'
+import fetch from 'isomorphic-fetch'
 import CreateItem from './CreateItem'
 const cookies = new Cookies()
 
@@ -13,6 +14,28 @@ export default class extends React.Component {
   constructor (props) {
     super(props)
     this.props = props
+    this.handleDelete = this.handleDelete.bind(this)
+  }
+
+  handleDelete (object) {
+    const action = object.actions.find(act => act.method === 'DELETE')
+    const encoded = cookies.get('auth')
+    const header = {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Basic ${encoded}`,
+        'Access-Control-Allow-Origin': '*'
+      }
+    }
+    const uri = config.API.PATH + action.href
+    fetch(uri, header)
+      .then(resp => {
+        if (resp.status >= 400) {
+          throw new Error('Unable to access content')
+        }
+        this.props.history.push('/checklists')
+      })
+      .catch(ex => message.error('Cannot delete checklist'))
   }
   render () {
     const encoded = cookies.get('auth')
@@ -47,6 +70,14 @@ export default class extends React.Component {
                     )}
                     onJson={json => (
                       <div>
+                        <Tooltip title='Remove this resource'>
+                          <Button
+                            type='danger'
+                            size='large'
+                            icon='delete'
+                            onClick={() => this.handleDelete(json)}
+                          />
+                        </Tooltip>
                         <h1><strong>Name</strong> : {json.properties.name}</h1>
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
                         <h1><strong>Completion Date</strong> : {json.properties.completionDate}</h1>

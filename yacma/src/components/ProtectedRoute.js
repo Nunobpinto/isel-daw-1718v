@@ -6,11 +6,8 @@ import {
 import Cookies from 'universal-cookie'
 const cookies = new Cookies()
 
-const checkAuth = () => {
-  const auth = cookies.get('auth')
-  if (!auth) return false
-  return true
-}
+const checkAuth = () => cookies.get('auth')
+
 export default ({ component: Component }) => (
   <Route render={props => (
     checkAuth() ? (

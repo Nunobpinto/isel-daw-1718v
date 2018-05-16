@@ -10,6 +10,7 @@ import Templates from './components/Templates'
 import Checklist from './components/Checklist'
 import Template from './components/Template'
 import Item from './components/Item'
+import ItemTemplate from './components/ItemTemplate'
 import config from './config'
 
 export default () => (
@@ -24,7 +25,7 @@ export default () => (
       <ProtectedRoute exact path={config.APP.URI_CHECKLIST_ITEM_DETAIL} component={Item} />
       <ProtectedRoute exact path={config.APP.URI_TEMPLATE_ALL} component={Templates} />
       <ProtectedRoute exact path={config.APP.URI_TEMPLATE_DETAIL} component={Template} />
-      <ProtectedRoute exact path={config.APP.URI_TEMPLATE_ITEM_DETAIL} component={Item} />
+      <ProtectedRoute exact path={config.APP.URI_TEMPLATE_ITEM_DETAIL} component={ItemTemplate} />
     </Switch>
   </BrowserRouter>
 )
