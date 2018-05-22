@@ -71,12 +71,12 @@ export default class extends React.Component {
                             type='danger'
                             size='large'
                             icon='delete'
+                            shape='circle'
                             onClick={() => this.handleDelete(json)}
                           />
                         </Tooltip>
                         <h1><strong>Name</strong> : {json.properties.name}</h1>
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
-                        <h1><strong>State</strong> : {json.properties.state}</h1>
                       </div>
                     )}
                     onError={_ => (

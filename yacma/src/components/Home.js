@@ -3,7 +3,7 @@ import Navbar from './Navbar'
 import HttpGet from './http-get'
 import HttpGetSwitch from './http-get-switch'
 import Cookies from 'universal-cookie'
-import { Spin, Avatar } from 'antd'
+import { Spin } from 'antd'
 import config from '../config'
 
 const cookies = new Cookies()
@@ -37,7 +37,6 @@ export default () => {
                   onLoading={() => <div><Spin id='spin' tip='Loading User HomePage...' /></div>}
                   onJson={json => (
                     <div>
-                      <Avatar size='large' shape='square' icon='user' />
                       <h1><strong>Username</strong> : {json.properties.username}</h1>
                       <h1><strong>E-Mail</strong> : {json.properties.email}</h1>
                       <h1><strong>Family Name</strong> : {json.properties.familyName}</h1>

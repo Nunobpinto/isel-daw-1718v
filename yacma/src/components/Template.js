@@ -83,6 +83,7 @@ export default class Template extends React.Component {
                             type='danger'
                             size='large'
                             icon='delete'
+                            shape='circle'
                             onClick={() => this.handleDelete(json)}
                           />
                         </Tooltip>
