@@ -47,16 +47,15 @@ export default class extends React.Component {
       }
     }
     const path = this.props.location.pathname
-    const checklistId = path.split('/')[2]
+    const templateId = path.split('/')[2]
     const itemId = path.split('/')[4]
-    const url = config.API.PATH + '/api/templates/' + checklistId + '/items/' + itemId
+    const url = config.API.PATH + '/api/templates/' + templateId + '/items/' + itemId
     return (
       <div>
         <div>
           <Navbar />
         </div>
         <div>
-          <h1>Item with id = {itemId}</h1>
           <div>
             <HttpGet url={url} headers={header}
               render={(result) => (
@@ -66,16 +65,17 @@ export default class extends React.Component {
                     onLoading={() => <div><Spin id='spin' tip='Loading Item...' /></div>}
                     onJson={json => (
                       <div>
-                        <Tooltip title='Remove this resource'>
+                        <h1 class='displayBySide'><strong>{json.properties.name}</strong></h1>
+                        <Tooltip placement='right' title='Remove this resource'>
                           <Button
                             type='danger'
+                            id='removeListBtn'
                             size='large'
                             icon='delete'
                             shape='circle'
                             onClick={() => this.handleDelete(json)}
                           />
                         </Tooltip>
-                        <h1><strong>Name</strong> : {json.properties.name}</h1>
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
                       </div>
                     )}
@@ -87,6 +87,13 @@ export default class extends React.Component {
                 </div>)} />
           </div>
         </div>
+        <Button
+          id='backBtn'
+          type='primary'
+          icon='left'
+          onClick={() => this.props.history.push(`/templates/${templateId}`)}>
+                          Template
+        </Button>
       </div>
     )
   }

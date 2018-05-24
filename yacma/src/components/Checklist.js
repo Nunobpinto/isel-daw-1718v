@@ -55,7 +55,6 @@ export default class extends React.Component {
           <Navbar />
         </div>
         <div>
-          <h1>List with id = {checklistId}</h1>
           <div>
             <HttpGet url={url} headers={header}
               render={(result) => (
@@ -70,8 +69,10 @@ export default class extends React.Component {
                     )}
                     onJson={json => (
                       <div>
-                        <Tooltip title='Remove this resource'>
+                        <h1 class='displayBySide'><strong>{json.properties.name}</strong></h1>
+                        <Tooltip placement='right' title='Remove this resource'>
                           <Button
+                            id='removeListBtn'
                             type='danger'
                             size='large'
                             icon='delete'
@@ -79,7 +80,6 @@ export default class extends React.Component {
                             onClick={() => this.handleDelete(json)}
                           />
                         </Tooltip>
-                        <h1><strong>Name</strong> : {json.properties.name}</h1>
                         <h1><strong>Description</strong> : {json.properties.description}</h1>
                         <h1><strong>Completion Date</strong> : {json.properties.completionDate}</h1>
                         <HttpGet
@@ -126,6 +126,13 @@ export default class extends React.Component {
                 </div>)} />
           </div>
         </div>
+        <Button
+          id='backBtn'
+          type='primary'
+          icon='left'
+          onClick={() => this.props.history.push(`/checklists`)}>
+          Checklists
+        </Button>
       </div>
     )
   }
