@@ -12,6 +12,6 @@ export default {
     URI_HOME: '/'
   },
   API: {
-    PATH: 'http://localhost:8080'
+    PATH: 'http://35.234.129.175'
   }
 }

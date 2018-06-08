@@ -58,7 +58,7 @@ export default () => {
                     return (
                       <div>
                         <h1>No Checklists yet</h1>
-                        <CreateChecklist url={json.actions[1]} />
+                        <CreateChecklist url={json.actions[1].href} />
                       </div>
                     )
                   }} />

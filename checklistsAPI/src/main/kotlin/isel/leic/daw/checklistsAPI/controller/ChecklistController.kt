@@ -190,7 +190,7 @@ class ChecklistController {
                     val items =
                             itemService.getItemsByChecklist(
                                     checklistService.getChecklistByIdAndUser(
-                                            it.checklistId!!,
+                                            it.checklistId,
                                             User(username = principal.name)
                                     ).orElseThrow({ NotFoundException("The resource doesn't exist") })
                             ).toMutableSet()
