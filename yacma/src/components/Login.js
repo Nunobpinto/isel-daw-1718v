@@ -1,23 +1,52 @@
 import React from 'react'
-import {Redirect, Link} from 'react-router-dom'
-import {message, Form, Input, Button, Icon, Spin} from 'antd'
+import {Redirect} from 'react-router-dom'
+import { Button } from 'antd'
 import logo from '../logo.svg'
 import 'antd/dist/antd.css'
-import config from '../config'
 import Cookies from 'universal-cookie'
-import HttpGet from './http-get'
-import HttpGetSwitch from './http-get-switch'
+import { UserManager } from 'oidc-client'
 const cookies = new Cookies()
+
+var mitreIDsettings = {
+  authority: 'http://localhost:8080/openid-connect-server-webapp',
+  client_id: '2ccb1d09-a1b5-4fb2-b2cf-c993d0b085ff',
+  redirect_uri: 'http://localhost:3000/redirect.html',
+  popup_redirect_uri: 'http://localhost:3000/redirect.html',
+  post_logout_redirect_uri: 'http://localhost:3000/user-manager-sample.html',
+  response_type: 'token id_token',
+  scope: 'openid email profile',
+  silent_redirect_uri: 'http://localhost:9000/user-manager-sample-silent.html',
+  automaticSilentRenew: true,
+  filterProtocolClaims: true,
+  loadUserInfo: true
+}
+
+const mgr = new UserManager(mitreIDsettings)
 
 class LoginForm extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      redirect: false,
       username: '',
-      password: ''
+      password: '',
+      user: undefined
     }
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.login = this.login.bind(this)
+  }
+
+  login () {
+    mgr.getUser()
+      .then(user => {
+        if (user) {
+          this.setState({ user: user })
+        } else {
+          mgr.signinPopup()
+            .then(user => {
+              this.setState({ user: user })
+            })
+        }
+      })
   }
 
   handleSubmit (e) {
@@ -34,98 +63,25 @@ class LoginForm extends React.Component {
   }
 
   render () {
-    let {redirect} = this.state
     if (cookies.get('auth')) {
       return (<Redirect to='' />)
     }
-    if (redirect === true) {
-      const authString = `${this.state.username}:${this.state.password}`
-      const encoded = window.btoa(authString)
-      const header = {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${encoded}`,
-          'Access-Control-Allow-Origin': '*'
-        }
-      }
-      const url = config.API.PATH + '/api/users/' + this.state.username
-      return (
-        <HttpGet
-          url={url}
-          headers={header}
-          render={(result) => (
-            <div>
-              <HttpGetSwitch
-                result={result}
-                onLoading={() => <div><Spin id='spin' tip='Checking user credentials...' /></div>}
-                onJson={json => {
-                  cookies.set('auth', encoded, {maxAge: 99999})
-                  this.setState({redirect: false})
-                  return (<Redirect to='/' />)
-                }
-                }
-                onError={_ => {
-                  message.error('Error in login, try again!')
-                  this.setState({redirect: false})
-                  return null
-                }
-
-                }
-              />
-            </div>
-          )} />
-
-      )
-    }
-    const { getFieldDecorator } = this.props.form
     return (
       <div className='App'>
         <header className='App-header'>
           <img src={logo} className='App-logo' alt='logo' />
           <h1 className='App-title'>Welcome to YACMA <small>(Yet Another Checklist Management Application)</small></h1>
         </header>
-        <p className='App-intro' >
-          <div>
-            <Form onSubmit={this.handleSubmit} className='login-form' id='formItem' >
-              <Form.Item>
-                {getFieldDecorator('username', {
-                  rules: [{ required: true, message: 'Please input your username!' }]
-                })(
-                  <Input
-                    prefix={<Icon type='user' style={{ color: 'rgba(0,0,0,.25)' }} />}
-                    name='username'
-                    placeholder='Username'
-                    size='large'
-                    value={this.state.username} />
-                )}
-              </Form.Item>
-              <Form.Item>
-                {getFieldDecorator('password', {
-                  rules: [{ required: true, message: 'Please input your Password!' }]
-                })(
-                  <Input
-                    prefix={<Icon type='lock' style={{ color: 'rgba(0,0,0,.25)' }} />}
-                    type='password'
-                    placeholder='Password'
-                    size='large'
-                    value={this.state.password} />
-                )}
-              </Form.Item>
-              <Form.Item>
-                <Button type='primary' htmlType='submit' className='login-form-button'>
-              Log in
-                </Button>
-                <br />
-                Or create an account
-                <Link to='/register'> Register </Link>
-              </Form.Item>
-            </Form>
-          </div>
-        </p>
+        <div className='App-intro' >
+          {this.state.user
+            ? <pre>{JSON.stringify(this.state.user, null, 2)}</pre>
+            : <Button type='primary' onClick={this.login} className='login-form-button'>Login</Button>
+
+          }
+        </div>
       </div>
     )
   }
 }
 
-const WrappedNormalLoginForm = Form.create()(LoginForm)
-export default WrappedNormalLoginForm
+export default LoginForm

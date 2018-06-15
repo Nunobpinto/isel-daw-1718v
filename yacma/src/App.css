@@ -22,6 +22,11 @@
 
 .App-intro {
   font-size: large;
+  padding-top: 10%;
+}
+
+.login-form-button {
+  width: 10%;
 }
 
 .displayBySide{
