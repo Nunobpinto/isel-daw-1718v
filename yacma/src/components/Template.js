@@ -23,11 +23,11 @@ export default class Template extends React.Component {
 
   handleDelete (object) {
     const action = object.actions.find(act => act.method === 'DELETE')
-    const encoded = cookies.get('auth')
+    const token = cookies.get('auth')
     const header = {
       method: 'DELETE',
       headers: {
-        'Authorization': `Basic ${encoded}`,
+        'Authorization': `Bearer ${token}`,
         'Access-Control-Allow-Origin': '*'
       }
     }
@@ -48,11 +48,11 @@ export default class Template extends React.Component {
   render () {
     const path = this.props.location.pathname
     const templateId = path.split('/')[2]
-    const encoded = cookies.get('auth')
+    const token = cookies.get('auth')
     const header = {
       method: 'GET',
       headers: {
-        'Authorization': `Basic ${encoded}`,
+        'Authorization': `Bearer ${token}`,
         'Access-Control-Allow-Origin': '*'
       }
     }

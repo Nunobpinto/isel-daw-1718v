@@ -26,12 +26,12 @@ export default class extends React.Component {
 
   handleDelete (object) {
     const action = object.actions.find(act => act.method === 'DELETE')
-    const encoded = cookies.get('auth')
+    const token = cookies.get('auth')
     const checklistId = object.properties.checklistId
     const header = {
       method: 'DELETE',
       headers: {
-        'Authorization': `Basic ${encoded}`,
+        'Authorization': `Bearer ${token}`,
         'Access-Control-Allow-Origin': '*'
       }
     }
@@ -48,7 +48,7 @@ export default class extends React.Component {
 
   handleUpdate (object) {
     const action = object.actions.find(act => act.method === 'PUT')
-    const encoded = cookies.get('auth')
+    const token = cookies.get('auth')
     const itemState = 'Completed'
     const itemDescription = object.properties.description
     const itemName = object.properties.name
@@ -62,7 +62,7 @@ export default class extends React.Component {
       body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${encoded}`,
+        'Authorization': `Bearer ${token}`,
         'Access-Control-Allow-Origin': '*'
       }
     }
@@ -83,11 +83,11 @@ export default class extends React.Component {
   }
 
   render () {
-    const encoded = cookies.get('auth')
+    const token = cookies.get('auth')
     const header = {
       method: 'GET',
       headers: {
-        'Authorization': `Basic ${encoded}`,
+        'Authorization': `Bearer ${token}`,
         'Access-Control-Allow-Origin': '*'
       }
     }

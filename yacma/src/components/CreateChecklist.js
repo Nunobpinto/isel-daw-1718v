@@ -50,12 +50,12 @@ export default class extends React.Component {
         completion_date: state.date
       }
       const path = config.API.PATH + this.state.url
-      const encoded = cookies.get('auth')
+      const token = cookies.get('auth')
       const header = {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
-          'Authorization': `Basic ${encoded}`,
+          'Authorization': `Bearer ${token}`,
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
         }

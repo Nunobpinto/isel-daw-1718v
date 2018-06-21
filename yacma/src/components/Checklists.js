@@ -10,11 +10,11 @@ import {Spin} from 'antd'
 const cookies = new Cookies()
 
 export default () => {
-  const encoded = cookies.get('auth')
+  const token = cookies.get('auth')
   const header = {
     method: 'GET',
     headers: {
-      'Authorization': `Basic ${encoded}`,
+      'Authorization': `Bearer ${token}`,
       'Access-Control-Allow-Origin': '*'
     }
   }
