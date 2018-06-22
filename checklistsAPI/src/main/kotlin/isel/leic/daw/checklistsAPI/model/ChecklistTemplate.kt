@@ -35,7 +35,7 @@ data class ChecklistTemplate(
         @JsonIgnore
         @ApiModelProperty("Username of the creator of this Template")
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "username", nullable = false)
+        @JoinColumn(name = "sub", nullable = false)
         val user: User? = User()
 ) : Serializable {
         override fun equals(other: Any?): Boolean {

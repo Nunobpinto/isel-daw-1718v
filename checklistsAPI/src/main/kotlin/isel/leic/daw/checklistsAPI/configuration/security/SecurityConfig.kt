@@ -31,7 +31,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers(PROTECTED_URI_PATTERN).hasRole("USER")
-                .and().httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())
+                .and().openidLogin().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
 
@@ -43,13 +43,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     fun authenticationProvider(): DaoAuthenticationProvider {
         val auth = DaoAuthenticationProvider()
         auth.setUserDetailsService(userConfig)
-        auth.setPasswordEncoder(passwordEncoder())
         return auth
-    }
-
-    @Bean
-    fun passwordEncoder(): BCryptPasswordEncoder {
-        return BCryptPasswordEncoder()
     }
 
     @Bean

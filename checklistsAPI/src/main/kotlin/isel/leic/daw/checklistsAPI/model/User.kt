@@ -9,25 +9,9 @@ import javax.persistence.*
 @Table(name = "app_user")
 data class User(
         @Id
-        @ApiModelProperty("Username that identifies the User")
-        @Column(name = "username")
-        val username: String = "",
-
-        @ApiModelProperty("Users Family Name")
-        @Column(name = "family_name")
-        val familyName: String = "",
-
-        @ApiModelProperty("Users Given Name")
-        @Column(name = "given_name")
-        val givenName: String = "",
-
-        @ApiModelProperty("Users Email")
-        @Column(name = "email")
-        val email: String = "",
-
-        @ApiModelProperty("Users Password")
-        @Column(name = "password")
-        val password: String = "",
+        @ApiModelProperty("User Subject that identifies the User")
+        @Column(name = "sub")
+        val sub: String = "",
 
         @JsonIgnore
         @ApiModelProperty("Users Templates")
