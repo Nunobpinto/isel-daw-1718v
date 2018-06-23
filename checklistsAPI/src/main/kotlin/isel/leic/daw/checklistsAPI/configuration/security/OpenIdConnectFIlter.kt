@@ -26,7 +26,7 @@ class OpenIdConnectFilter : Filter {
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         val method = (request as HttpServletRequest).method
-        if( !checkIfProtectedResource(request) ) {
+        if( !checkIfProtectedResource(request) || method == "OPTIONS") {
             return chain.doFilter(request, response)
         }
         val bearerToken = getBearerToken(request)
@@ -38,12 +38,15 @@ class OpenIdConnectFilter : Filter {
     }
 
     private fun getIntrospectionResponse(bearerToken: String?): IntrospectionResponse {
-        val authHeader = "Basic ${Base64.getEncoder().encode((DeployedData.CLIENT_ID + ":" + DeployedData.CLIENT_SECRET).toByteArray())}"
+        val encoded = String(Base64.getEncoder().encode((DeployedData.CLIENT_ID + ":" + DeployedData.CLIENT_SECRET).toByteArray()))
+        val authHeader = "Basic $encoded"
         val contentType = "application/x-www-form-urlencoded"
-        val body = "token=$bearerToken"
+        val token = bearerToken!!.split(" ")[1]
+        val body = "token=$token"
 
         val url = URL(DeployedData.INTROSPECT_ENDPOINT)
         val con = url.openConnection() as HttpURLConnection
+        con.doOutput = true;
         con.requestMethod = "POST"
         con.setRequestProperty("Content-Type", contentType)
         con.setRequestProperty("Authorization", authHeader)
