@@ -19,7 +19,6 @@ import isel.leic.daw.checklistsAPI.service.ItemServiceImpl
 import javassist.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
@@ -50,7 +49,7 @@ class ChecklistController {
             @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
-        val user = User(username = principal.name)
+        val user = User(sub = principal.name)
         val checklists: List<Checklist>
         checklists = if (offset == "0" && limit == "0") checklistService.getChecklistByUser(user)
         else checklistService.getChecklistByUserPaginated(user, offset.toInt(), limit.toInt())
@@ -76,7 +75,7 @@ class ChecklistController {
             @PathVariable checklistId: Long,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val output = outputMapper.toChecklistOutput(checklist, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -98,7 +97,7 @@ class ChecklistController {
             @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
-        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val items: List<Item>
         items = if (offset == "0" && limit == "0") itemService.getItemsByChecklist(checklist)
@@ -128,7 +127,7 @@ class ChecklistController {
             @PathVariable itemId: Long,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val item = itemService.getItemByChecklistAndItemId(checklist, itemId)
         val output = outputMapper.toItemOutput(item, checklistId)
@@ -146,7 +145,7 @@ class ChecklistController {
             @RequestBody input: ChecklistInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        var checklist = inputMapper.toChecklist(input, User(username = principal.name))
+        var checklist = inputMapper.toChecklist(input, User(sub = principal.name))
         checklist = checklistService.saveChecklist(checklist)
         val output = outputMapper.toChecklistOutput(checklist, principal.name)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -166,7 +165,7 @@ class ChecklistController {
             @RequestBody input: ItemInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         var item = inputMapper.toItem(input, checklist)
         item = itemService.saveItem(item)
@@ -191,13 +190,13 @@ class ChecklistController {
                             itemService.getItemsByChecklist(
                                     checklistService.getChecklistByIdAndUser(
                                             it.checklistId,
-                                            User(username = principal.name)
+                                            User(sub = principal.name)
                                     ).orElseThrow({ NotFoundException("The resource doesn't exist") })
                             ).toMutableSet()
 
                     inputMapper.toChecklist(
                             it,
-                            User(username = principal.name),
+                            User(sub = principal.name),
                             items
                     )
                 }
@@ -224,12 +223,12 @@ class ChecklistController {
             @RequestBody input: ChecklistInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val originalChecklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+        val originalChecklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         input.checklistId = checklistId
         val checklist = inputMapper.toChecklist(
                 input,
-                User(username = principal.name),
+                User(sub = principal.name),
                 itemService.getItemsByChecklist(originalChecklist).toMutableSet(),
                 originalChecklist.template
         )
@@ -252,7 +251,7 @@ class ChecklistController {
             @RequestBody input: ItemCollectionInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val items = input
                 .items
@@ -284,7 +283,7 @@ class ChecklistController {
             @RequestBody input: ItemInputModel,
             principal: Principal
     ): ResponseEntity<Entity> {
-        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         input.itemId = itemId
         var item = inputMapper.toItem(input, checklist)
@@ -299,7 +298,7 @@ class ChecklistController {
             ApiResponse(code = 400, message = "Bad Request")
     )
     @DeleteMapping
-    fun deleteAllChecklists(principal: Principal) = checklistService.deleteAllChecklistByUser(User(username = principal.name))
+    fun deleteAllChecklists(principal: Principal) = checklistService.deleteAllChecklistByUser(User(sub = principal.name))
 
     @ApiOperation(value = "Deletes specific Checklist")
     @ApiResponses(
@@ -312,7 +311,7 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist to be deleted", required = true)
             @PathVariable checklistId: Long,
             principal: Principal
-    ) = checklistService.deleteChecklistByIdAndUser(checklistId, User(username = principal.name))
+    ) = checklistService.deleteChecklistByIdAndUser(checklistId, User(sub = principal.name))
 
     @ApiOperation(value = "Deletes all Items from a specific Checklist")
     @ApiResponses(
@@ -325,7 +324,7 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the Checklist from which the Items will be deleted", required = true)
             @PathVariable checklistId: Long,
             principal: Principal
-    ) = itemService.deleteAllItemsByChecklist(checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+    ) = itemService.deleteAllItemsByChecklist(checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
             .orElseThrow({ NotFoundException("The resource doesn't exist") }))
 
     @ApiOperation(value = "Deletes specific Item from a Checklist")
@@ -342,7 +341,7 @@ class ChecklistController {
             @PathVariable itemId: Long,
             principal: Principal
     ) = itemService.deleteItemByIdAndChecklist(
-            checklistService.getChecklistByIdAndUser(checklistId, User(username = principal.name))
+            checklistService.getChecklistByIdAndUser(checklistId, User(sub = principal.name))
                     .orElseThrow({ NotFoundException("The resource doesn't exist") })
             , itemId
     )

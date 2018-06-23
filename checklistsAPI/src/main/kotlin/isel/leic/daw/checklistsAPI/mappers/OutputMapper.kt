@@ -6,10 +6,7 @@ import isel.leic.daw.checklistsAPI.outputModel.single.*
 class OutputMapper {
     fun toUserOutput(user: User) =
             UserOutputModel(
-                    username = user.username,
-                    familyName = user.familyName,
-                    givenName = user.givenName,
-                    email = user.email
+                    username = user.sub
             )
 
     fun toItemOutput(item: Item, checklistId: Long) =

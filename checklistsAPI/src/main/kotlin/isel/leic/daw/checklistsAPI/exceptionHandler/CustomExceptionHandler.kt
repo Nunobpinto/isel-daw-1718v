@@ -1,9 +1,6 @@
 package isel.leic.daw.checklistsAPI.exceptionHandler
 
-import isel.leic.daw.checklistsAPI.exceptions.BadRequestException
-import isel.leic.daw.checklistsAPI.exceptions.ConflictException
-import isel.leic.daw.checklistsAPI.exceptions.NotFoundException
-import isel.leic.daw.checklistsAPI.exceptions.UnauthenticatedException
+import isel.leic.daw.checklistsAPI.exceptions.*
 import isel.leic.daw.checklistsAPI.outputModel.error.ErrorOutputModel
 import org.hibernate.HibernateException
 import org.springframework.dao.EmptyResultDataAccessException
@@ -11,7 +8,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler

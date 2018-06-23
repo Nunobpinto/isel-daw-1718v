@@ -10,11 +10,7 @@ class InputMapper {
             checklistTemplates: MutableSet<ChecklistTemplate> = mutableSetOf()
     ) =
             User(
-                    username = input.username,
-                    familyName = input.familyName,
-                    givenName = input.givenName,
-                    email = input.email,
-                    password = input.password,
+                    sub = input.username,
                     checklists = checklists,
                     checklistTemplates = checklistTemplates
             )

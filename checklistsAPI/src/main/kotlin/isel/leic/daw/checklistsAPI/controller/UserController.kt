@@ -5,11 +5,11 @@ import isel.leic.daw.checklistsAPI.inputModel.single.UserInputModel
 import isel.leic.daw.checklistsAPI.model.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.*
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.*
+import isel.leic.daw.checklistsAPI.exceptions.UnauthenticatedException
 import isel.leic.daw.checklistsAPI.mappers.InputMapper
 import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.service.UserService
@@ -57,7 +57,7 @@ class UserController {
             principal: Principal
     ): User {
         val currentUser = userService.getUser(input.username)
-        if (currentUser.username != principal.name) throw AccessDeniedException("Forbidden")
+        if (currentUser.sub != principal.name) throw UnauthenticatedException("Forbidden")
         val user = inputMapper.toUser(input, currentUser.checklists, currentUser.checklistTemplates)
         return userService.saveUser(user)
     }
@@ -74,7 +74,7 @@ class UserController {
             @PathVariable username: String,
             principal: Principal
     ) {
-        if (username != principal.name) throw AccessDeniedException("Forbidden")
+        if (username != principal.name) throw UnauthenticatedException("Forbidden")
         return userService.deleteUser(username)
     }
 
