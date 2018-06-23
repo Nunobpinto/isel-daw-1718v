@@ -4,6 +4,7 @@ import com.google.code.siren4j.Siren4J
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.*
+import isel.leic.daw.checklistsAPI.configuration.security.UserInfo
 import isel.leic.daw.checklistsAPI.inputModel.collection.ChecklistTemplateCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.collection.ItemTemplateCollectionInputModel
 import isel.leic.daw.checklistsAPI.inputModel.single.ChecklistInputModel
@@ -24,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
-import java.security.Principal
 
 @RestController
 @RequestMapping("/api/templates", produces = [Siren4J.JSON_MEDIATYPE])
@@ -39,6 +39,8 @@ class ChecklistTemplateController {
     lateinit var checklistService: ChecklistService
     @Autowired
     lateinit var itemService: ItemService
+    @Autowired
+    lateinit var userInfo: UserInfo
 
     val inputMapper: InputMapper = InputMapper()
     val outputMapper: OutputMapper = OutputMapper()
@@ -51,13 +53,12 @@ class ChecklistTemplateController {
     )
     @GetMapping
     fun getAllTemplates(
-            principal: Principal,
             @ApiParam(value = "Number of elements to skip", required = false)
             @RequestParam(value = "offset", required = false, defaultValue = "0") offset: String,
             @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
-        val user = User(sub = principal.name)
+        val user = User(sub = userInfo.sub!!)
         val checklistTemplates: List<ChecklistTemplate>
         checklistTemplates = if (offset == "0" && limit == "0") checklistTemplateService.getTemplatesByUser(user)
         else checklistTemplateService.getTemplatesByUserPaginated(user, offset.toInt(), limit.toInt())
@@ -65,7 +66,7 @@ class ChecklistTemplateController {
                 offset = offset,
                 limit = limit,
                 checklistTemplates = checklistTemplates.map {
-                    outputMapper.toChecklistTemplateOutput(it, principal.name)
+                    outputMapper.toChecklistTemplateOutput(it, userInfo.sub!!)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -80,12 +81,11 @@ class ChecklistTemplateController {
     @GetMapping("/{checklistTemplateId}")
     fun getTemplate(
             @ApiParam(value = "The identifier of the desire Template ", required = true)
-            @PathVariable checklistTemplateId: Long,
-            principal: Principal
+            @PathVariable checklistTemplateId: Long
     ): ResponseEntity<Entity> {
-        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
-        val output = outputMapper.toChecklistTemplateOutput(template, principal.name)
+        val output = outputMapper.toChecklistTemplateOutput(template, userInfo.sub!!)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -99,13 +99,12 @@ class ChecklistTemplateController {
     fun getItemsOfChecklistTemplate(
             @ApiParam(value = "The identifier of the Template where the Items belong", required = true)
             @PathVariable checklistTemplateId: Long,
-            principal: Principal,
             @ApiParam(value = "Number of elements to skip", required = false)
             @RequestParam(value = "offset", required = false, defaultValue = "0") offset: String,
             @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
-        val checklistTemplate = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+        val checklistTemplate = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                 .orElseThrow({ NotFoundException("The resource doesn't exist")})
         val itemTemplates: List<ItemTemplate>
         itemTemplates = if (offset == "0" && limit == "0") itemTemplateService.getItemsByTemplate(checklistTemplate)
@@ -132,10 +131,9 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template where the Item belongs", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "The identifier of the Item", required = true)
-            @PathVariable itemId: Long,
-            principal: Principal
+            @PathVariable itemId: Long
     ): ResponseEntity<Entity> {
-        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                 .orElseThrow({ NotFoundException("The resource doesn't exist")})
         val itemTemplate = itemTemplateService.getItemTemplateByIdAndTemplate(template, itemId)
         val output = outputMapper.toItemTemplateOutput(itemTemplate, checklistTemplateId)
@@ -150,17 +148,16 @@ class ChecklistTemplateController {
     @PostMapping
     fun addChecklistTemplate(
             @ApiParam(value = "Input that represents the Template to be created", required = true)
-            @RequestBody input: ChecklistTemplateInputModel,
-            principal: Principal
+            @RequestBody input: ChecklistTemplateInputModel
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.saveTemplate(
                 ChecklistTemplate(
                         checklistTemplateName = input.checklistTemplateName,
                         checklistTemplateDescription = input.checklistTemplateDescription,
-                        user = User(sub = principal.name)
+                        user = User(sub = userInfo.sub!!)
                 )
         )
-        val output = outputMapper.toChecklistTemplateOutput(template, principal.name)
+        val output = outputMapper.toChecklistTemplateOutput(template, userInfo.sub!!)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -175,15 +172,14 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template from which the Checklist will be created ", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Checklist to be created", required = true)
-            @RequestBody input: ChecklistInputModel,
-            principal: Principal
+            @RequestBody input: ChecklistInputModel
     ): ResponseEntity<Entity> {
-        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                 .orElseThrow({ NotFoundException("The resource doesn't exist")})
         val checklist = checklistService.saveChecklist(
                 inputMapper.toChecklist(
                         input = input,
-                        user = User(sub = principal.name),
+                        user = User(sub = userInfo.sub!!),
                         template = template
                 )
         )
@@ -198,7 +194,7 @@ class ChecklistTemplateController {
                     )
                 }
         itemService.saveAllItems(items)
-        val output = outputMapper.toChecklistOutput(checklist, principal.name)
+        val output = outputMapper.toChecklistOutput(checklist, userInfo.sub!!)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -213,12 +209,11 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template for which a new Item will be created", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Item to be created", required = true)
-            @RequestBody input: ItemTemplateInputModel,
-            principal: Principal
+            @RequestBody input: ItemTemplateInputModel
     ): ResponseEntity<Entity> {
         val template = checklistTemplateService.getTemplateByIdAndUser(
                 checklistTemplateId,
-                User(sub = principal.name)
+                User(sub = userInfo.sub!!)
         ).orElseThrow({ NotFoundException("The resource doesn't exist") })
 
         val itemTemplate = itemTemplateService.saveItemTemplate(
@@ -235,26 +230,25 @@ class ChecklistTemplateController {
     @PutMapping
     fun updateChecklistTemplates(
             @ApiParam(value = "Input that represents a set of Templates to be updated", required = true)
-            @RequestBody input: ChecklistTemplateCollectionInputModel,
-            principal: Principal
+            @RequestBody input: ChecklistTemplateCollectionInputModel
     ): ResponseEntity<Entity> {
         val templates = input
                 .checklists
                 .map {
                     inputMapper.toChecklistTemplate(
                             it,
-                            User(sub = principal.name),
+                            User(sub = userInfo.sub!!),
                             itemTemplateService.getItemsByTemplate(
                                     checklistTemplateService.getTemplateByIdAndUser(
                                             it.checklistTemplateId,
-                                            User(sub = principal.name)
+                                            User(sub = userInfo.sub!!)
                                     ).orElseThrow({ NotFoundException("The resource doesn't exist") })
                             ).toMutableSet())
                 }
         checklistTemplateService.saveAllTemplates(templates.asIterable())
         val output = ChecklistTemplateCollectionOutputModel(
                 templates.map {
-                    outputMapper.toChecklistTemplateOutput(it, principal.name)
+                    outputMapper.toChecklistTemplateOutput(it, userInfo.sub!!)
                 }
         )
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -271,24 +265,23 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template to be updated", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents the Template updated", required = true)
-            @RequestBody input: ChecklistTemplateInputModel,
-            principal: Principal
+            @RequestBody input: ChecklistTemplateInputModel
     ): ResponseEntity<Entity> {
         val items = itemTemplateService.getItemsByTemplate(
                 checklistTemplateService.getTemplateByIdAndUser(
                         checklistTemplateId,
-                        User(sub = principal.name)
+                        User(sub = userInfo.sub!!)
                 ).orElseThrow({ NotFoundException("The resource doesn't exist") })
         ).toMutableSet()
         input.checklistTemplateId = checklistTemplateId
         val template = checklistTemplateService.saveTemplate(
                 inputMapper.toChecklistTemplate(
                         input,
-                        User(sub = principal.name),
+                        User(sub = userInfo.sub!!),
                         items
                 )
         )
-        val output = outputMapper.toChecklistTemplateOutput(template, principal.name)
+        val output = outputMapper.toChecklistTemplateOutput(template, userInfo.sub!!)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
@@ -303,10 +296,9 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template for wich the Items will be updated", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "Input that represents a set of Items updated", required = true)
-            @RequestBody input: ItemTemplateCollectionInputModel,
-            principal: Principal
+            @RequestBody input: ItemTemplateCollectionInputModel
     ): ResponseEntity<Entity> {
-        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val itemTemplates =
                 input
@@ -337,10 +329,9 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Item to be updated", required = true)
             @PathVariable itemId: Long,
             @ApiParam(value = "Input that represents the Item updated", required = true)
-            @RequestBody input: ItemTemplateInputModel,
-            principal: Principal
+            @RequestBody input: ItemTemplateInputModel
     ): ResponseEntity<Entity> {
-        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+        val template = checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         input.itemTemplateId = itemId
         val itemTemplate = inputMapper.toItemTemplate(input, template)
@@ -355,7 +346,7 @@ class ChecklistTemplateController {
             ApiResponse(code = 400, message = "Bad Request")
     )
     @DeleteMapping
-    fun deleteAllTemplates(principal: Principal) = checklistTemplateService.deleteAllTemplatesByUser(User(sub = principal.name))
+    fun deleteAllTemplates() = checklistTemplateService.deleteAllTemplatesByUser(User(sub = userInfo.sub!!))
 
     @ApiOperation(value = "Deletes specific Template")
     @ApiResponses(
@@ -366,11 +357,10 @@ class ChecklistTemplateController {
     @DeleteMapping("/{checklistTemplateId}")
     fun deleteSpecificTemplate(
             @ApiParam(value = "The identifier of the Template to be deleted", required = true)
-            @PathVariable checklistTemplateId: Long,
-            principal: Principal
+            @PathVariable checklistTemplateId: Long
     ) {
         val checklists: List<Checklist> = checklistService.getChecklistsByTemplate(
-                checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+                checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                         .orElseThrow({ NotFoundException("The resource doesn't exist") })
         )
         if (checklists.isNotEmpty()) {
@@ -389,12 +379,11 @@ class ChecklistTemplateController {
     @DeleteMapping("{checklistTemplateId}/items")
     fun deleteAllItemTemplates(
             @ApiParam(value = "The identifier of the Template from wich the Items will be deleted", required = true)
-            @PathVariable checklistTemplateId: Long,
-            principal: Principal
+            @PathVariable checklistTemplateId: Long
     ) = itemTemplateService.deleteAllItemsByTemplate(
             checklistTemplateService.getTemplateByIdAndUser(
                     checklistTemplateId,
-                    User(sub = principal.name)
+                    User(sub = userInfo.sub!!)
             ).orElseThrow({ NotFoundException("The resource doesn't exist") })
     )
 
@@ -409,10 +398,9 @@ class ChecklistTemplateController {
             @ApiParam(value = "The identifier of the Template from wich the Item will be deleted", required = true)
             @PathVariable checklistTemplateId: Long,
             @ApiParam(value = "The identifier of the Item to be deleted", required = true)
-            @PathVariable itemTemplateId: Long,
-            principal: Principal
+            @PathVariable itemTemplateId: Long
     ) = itemTemplateService.deleteItemByIdAndTemplate(
-            checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = principal.name))
+            checklistTemplateService.getTemplateByIdAndUser(checklistTemplateId, User(sub = userInfo.sub!!))
                     .orElseThrow({ NotFoundException("The resource doesn't exist") })
             , itemTemplateId)
 

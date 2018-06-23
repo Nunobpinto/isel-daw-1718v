@@ -7,14 +7,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RequestMethod
 
-
-
 @RestController
 @RequestMapping("/")
 class BaseController {
+
     @RequestMapping(method = [(RequestMethod.OPTIONS)], value = ["/*"])
     @ResponseBody
-    fun handleOptions(): ResponseEntity<Any> {
-        return ResponseEntity(HttpStatus.NO_CONTENT)
-    }
+    fun handleOptions(): ResponseEntity<Any> = ResponseEntity(HttpStatus.NO_CONTENT)
 }

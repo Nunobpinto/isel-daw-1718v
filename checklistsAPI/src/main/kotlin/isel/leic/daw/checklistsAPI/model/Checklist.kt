@@ -35,7 +35,7 @@ data class Checklist(
         var template: ChecklistTemplate? = ChecklistTemplate(),
 
         @JsonIgnore
-        @ApiModelProperty("Username of the owner and creator of this Checklist")
+        @ApiModelProperty("Id of the owner and creator of this Checklist")
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "sub", nullable = false)
         val user: User? = User(),
