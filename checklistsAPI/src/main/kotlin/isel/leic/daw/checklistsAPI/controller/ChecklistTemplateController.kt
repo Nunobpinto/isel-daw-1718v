@@ -41,9 +41,10 @@ class ChecklistTemplateController {
     lateinit var itemService: ItemService
     @Autowired
     lateinit var userInfo: UserInfo
-
-    val inputMapper: InputMapper = InputMapper()
-    val outputMapper: OutputMapper = OutputMapper()
+    @Autowired
+    lateinit var inputMapper: InputMapper
+    @Autowired
+    lateinit var outputMapper: OutputMapper
 
 
     @ApiOperation(value = "Returns all Templates")

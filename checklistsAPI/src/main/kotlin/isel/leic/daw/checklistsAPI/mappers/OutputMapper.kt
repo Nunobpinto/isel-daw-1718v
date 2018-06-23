@@ -2,7 +2,9 @@ package isel.leic.daw.checklistsAPI.mappers
 
 import isel.leic.daw.checklistsAPI.model.*
 import isel.leic.daw.checklistsAPI.outputModel.single.*
+import org.springframework.stereotype.Component
 
+@Component
 class OutputMapper {
     fun toUserOutput(user: User) =
             UserOutputModel(

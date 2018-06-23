@@ -25,7 +25,7 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(
                 ErrorOutputModel(
                         title = "Not Found",
-                        detail = "Could not find the resource you wanted",
+                        detail = ex.message ?: "Could not find the resource you wanted",
                         status = 404
                 ),
                 httpHeaders,

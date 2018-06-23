@@ -34,9 +34,10 @@ class ChecklistController {
     lateinit var itemService: ItemService
     @Autowired
     lateinit var userInfo: UserInfo
-
-    val inputMapper: InputMapper = InputMapper()
-    val outputMapper: OutputMapper = OutputMapper()
+    @Autowired
+    lateinit var inputMapper: InputMapper
+    @Autowired
+    lateinit var outputMapper: OutputMapper
 
     @ApiOperation(value = "Returns all Checklists")
     @ApiResponses(
@@ -50,7 +51,7 @@ class ChecklistController {
             @ApiParam(value = "Limit the elements to be shown", required = false)
             @RequestParam(value = "limit", required = false, defaultValue = "0") limit: String
     ): ResponseEntity<Entity> {
-        val user = User(sub = "90342.ASDFJWFA")
+        val user = User(sub = userInfo.sub!!)
         val checklists: List<Checklist>
         checklists = if (offset == "0" && limit == "0") checklistService.getChecklistByUser(user)
         else checklistService.getChecklistByUserPaginated(user, offset.toInt(), limit.toInt())
@@ -75,7 +76,7 @@ class ChecklistController {
             @ApiParam(value = "The identifier of the desire Checklist ", required = true)
             @PathVariable checklistId: Long
     ): ResponseEntity<Entity> {
-        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = "90342.ASDFJWFA"))
+        val checklist = checklistService.getChecklistByIdAndUser(checklistId, User(sub = userInfo.sub!!))
                 .orElseThrow({ NotFoundException("The resource doesn't exist") })
         val output = outputMapper.toChecklistOutput(checklist, userInfo.sub!!)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
@@ -142,7 +143,7 @@ class ChecklistController {
             @ApiParam(value = "Input that represents the Checklist to be created", required = true)
             @RequestBody input: ChecklistInputModel
     ): ResponseEntity<Entity> {
-        var checklist = inputMapper.toChecklist(input, User(sub = "90342.ASDFJWFA"))
+        var checklist = inputMapper.toChecklist(input, User(sub = userInfo.sub!!))
         checklist = checklistService.saveChecklist(checklist)
         val output = outputMapper.toChecklistOutput(checklist, userInfo.sub!!)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))

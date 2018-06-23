@@ -2,7 +2,9 @@ package isel.leic.daw.checklistsAPI.mappers
 
 import isel.leic.daw.checklistsAPI.inputModel.single.*
 import isel.leic.daw.checklistsAPI.model.*
+import org.springframework.stereotype.Component
 
+@Component
 class InputMapper {
     fun toUser(
             input: UserInputModel,

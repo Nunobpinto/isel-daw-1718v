@@ -23,9 +23,10 @@ class UserController {
 
     @Autowired
     lateinit var userService: UserService
-
-    val inputMapper: InputMapper = InputMapper()
-    val outputMapper: OutputMapper = OutputMapper()
+    @Autowired
+    lateinit var inputMapper: InputMapper
+    @Autowired
+    lateinit var outputMapper: OutputMapper
     @Autowired
     lateinit var userInfo: UserInfo
 
