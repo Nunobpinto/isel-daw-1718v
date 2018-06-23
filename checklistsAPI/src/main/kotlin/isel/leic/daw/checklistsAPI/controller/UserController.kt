@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*
 import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.*
+import isel.leic.daw.checklistsAPI.configuration.security.UserInfo
 import isel.leic.daw.checklistsAPI.exceptions.UnauthenticatedException
 import isel.leic.daw.checklistsAPI.mappers.InputMapper
 import isel.leic.daw.checklistsAPI.mappers.OutputMapper
@@ -25,6 +26,8 @@ class UserController {
 
     val inputMapper: InputMapper = InputMapper()
     val outputMapper: OutputMapper = OutputMapper()
+    @Autowired
+    lateinit var userInfo: UserInfo
 
     @ApiOperation(value = "Returns a Specific User")
     @ApiResponses(
@@ -41,6 +44,9 @@ class UserController {
         val output = outputMapper.toUserOutput(user)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
+
+    @PostMapping()
+    fun registerUser() = userService.saveUser(User(sub=userInfo.sub!!))
 
     @ApiOperation(value = "Updates Specific User")
     @ApiResponses(

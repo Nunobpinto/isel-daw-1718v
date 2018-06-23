@@ -5,6 +5,8 @@ import logo from '../logo.svg'
 import 'antd/dist/antd.css'
 import Cookies from 'universal-cookie'
 import oidc from '../oidcConfig'
+import fetch from 'isomorphic-fetch'
+import config from '../config';
 const cookies = new Cookies()
 
 class LoginForm extends React.Component {
@@ -26,6 +28,21 @@ class LoginForm extends React.Component {
             .then(user => {
               const token = user.access_token
               cookies.set('auth', token)
+              const options = {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Access-Control-Allow-Origin': '*'
+                }
+              }
+              fetch(config.API.PATH + '/api/users', options)
+                .then(resp => {
+                  if (resp.status >= 400) {
+                    throw new Error('Unable to access content')
+                  }
+                  this.props.history.push('/')
+                })
+                .catch(err => 'Error')
               this.props.history.push('/')
             })
         }

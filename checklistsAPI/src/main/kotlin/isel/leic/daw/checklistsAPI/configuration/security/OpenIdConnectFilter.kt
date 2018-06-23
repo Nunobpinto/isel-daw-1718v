@@ -38,7 +38,6 @@ class OpenIdConnectFilter : Filter {
         val introspectionResponse = getIntrospectionResponse(bearerToken)
 
         if( introspectionResponse.active ) {
-            userService.saveUser(User(introspectionResponse.sub!!))
             userInfo.sub = introspectionResponse.sub
             userInfo.user_id = introspectionResponse.user_id
             return chain.doFilter(request, response)
