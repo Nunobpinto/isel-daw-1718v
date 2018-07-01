@@ -6,7 +6,7 @@ import 'antd/dist/antd.css'
 import Cookies from 'universal-cookie'
 import oidc from '../oidcConfig'
 import fetch from 'isomorphic-fetch'
-import config from '../config';
+import config from '../config'
 const cookies = new Cookies()
 
 class LoginForm extends React.Component {
