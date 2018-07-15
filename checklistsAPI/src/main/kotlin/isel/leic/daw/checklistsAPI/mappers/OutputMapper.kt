@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class OutputMapper {
     fun toUserOutput(user: User) =
             UserOutputModel(
-                    username = user.sub
+                    sub = user.sub
             )
 
     fun toItemOutput(item: Item, checklistId: Long) =

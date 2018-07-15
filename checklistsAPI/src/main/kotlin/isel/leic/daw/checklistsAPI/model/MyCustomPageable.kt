@@ -1,4 +1,4 @@
-package isel.leic.daw.checklistsAPI
+package isel.leic.daw.checklistsAPI.model
 
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort

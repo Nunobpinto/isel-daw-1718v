@@ -38,10 +38,7 @@ import isel.leic.daw.checklistsAPI.outputModel.collection.ChecklistTemplateColle
         ]
 )
 class UserOutputModel(
-        val username: String = "",
-        val familyName: String = "",
-        val givenName: String = "",
-        val email: String = "",
+        val sub: String = "",
         @Siren4JSubEntity(
                 uri = "/api/checklists",
                 rel = ["collection", "search"],

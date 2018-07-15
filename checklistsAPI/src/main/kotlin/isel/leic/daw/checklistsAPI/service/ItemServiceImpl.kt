@@ -1,11 +1,10 @@
 package isel.leic.daw.checklistsAPI.service
 
-import isel.leic.daw.checklistsAPI.MyCustomPageable
+import isel.leic.daw.checklistsAPI.model.MyCustomPageable
 import isel.leic.daw.checklistsAPI.model.Checklist
 import isel.leic.daw.checklistsAPI.model.Item
 import isel.leic.daw.checklistsAPI.repo.ItemRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -17,7 +16,7 @@ class ItemServiceImpl : ItemService {
     lateinit var itemRepository: ItemRepository
 
     override fun getItemsByChecklistPaginated(checklist: Checklist, offset: Int, limit: Int): List<Item> {
-        val pageable = MyCustomPageable(offset, limit, Sort(Sort.Direction.ASC,"itemId")) as Pageable
+        val pageable = MyCustomPageable(offset, limit, Sort(Sort.Direction.ASC, "itemId")) as Pageable
         return itemRepository.findByChecklist(checklist, pageable)
     }
 

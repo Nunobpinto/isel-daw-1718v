@@ -1,6 +1,6 @@
 package isel.leic.daw.checklistsAPI.service
 
-import isel.leic.daw.checklistsAPI.MyCustomPageable
+import isel.leic.daw.checklistsAPI.model.MyCustomPageable
 import isel.leic.daw.checklistsAPI.model.ChecklistTemplate
 import isel.leic.daw.checklistsAPI.model.User
 import isel.leic.daw.checklistsAPI.repo.ChecklistTemplateRepository
@@ -16,7 +16,7 @@ class ChecklistTemplateServiceImpl : ChecklistTemplateService {
     lateinit var checklistTemplateRepository: ChecklistTemplateRepository
 
     override fun getTemplatesByUserPaginated(user: User, offset: Int, limit: Int): List<ChecklistTemplate> {
-        val pageable = MyCustomPageable(offset, limit, Sort(Sort.Direction.ASC,"checklistTemplateId")) as Pageable
+        val pageable = MyCustomPageable(offset, limit, Sort(Sort.Direction.ASC, "checklistTemplateId")) as Pageable
         return checklistTemplateRepository.findByUser(user, pageable)
     }
 
