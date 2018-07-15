@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
 class OpenIdConnectFilter : Filter {
     val CLIENT_ID = "daw"
     val CLIENT_SECRET = "secret"
-    val INTROSPECT_ENDPOINT = "http://localhost:8080/openid-connect-server-webapp/introspect"
+    val INTROSPECT_ENDPOINT = "http://35.197.215.43/openid-connect-server-webapp/introspect"
 
     private val log = LoggerFactory.getLogger(OpenIdConnectFilter::class.java)
 

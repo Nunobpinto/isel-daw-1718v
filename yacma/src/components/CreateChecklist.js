@@ -128,7 +128,7 @@ export default class extends React.Component {
             {...formItemLayout}
           >
             <DatePicker
-              defaultValue={moment('2018/05/19', dateFormat)}
+              defaultValue={moment(new Date().toJSON().slice(0, 10), dateFormat)}
               format={dateFormat}
               name='date'
               onChange={(obj, value) => this.onDateChange('date', value)}

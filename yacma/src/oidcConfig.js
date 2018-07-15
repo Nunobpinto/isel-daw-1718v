@@ -6,7 +6,7 @@ export default () => {
     .hostname}${port}`
 
   return new UserManager({
-    authority: 'http://35.189.66.182/openid-connect-server-webapp',
+    authority: 'http://35.197.215.43/openid-connect-server-webapp/',
     client_id: 'daw',
     redirect_uri: `${currentUrl}/redirect`,
     popup_redirect_uri: `${currentUrl}/redirect`,
