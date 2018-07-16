@@ -12,7 +12,7 @@ class UserServiceImpl : UserService {
     lateinit var userRepository: UserRepository
 
     override fun getUser(username: String) =
-            userRepository.findById(username).get()
+            userRepository.findById(username)
 
     override fun saveUser(user: User) =
             userRepository.save(user)

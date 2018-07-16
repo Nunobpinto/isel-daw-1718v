@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
 class OpenIdConnectFilter : Filter {
     val CLIENT_ID = "daw"
     val CLIENT_SECRET = "secret"
-    val INTROSPECT_ENDPOINT = "http://localhost:8080/openid-connect-server-webapp/introspect"
+    val INTROSPECT_ENDPOINT = "http://35.197.215.43/openid-connect-server-webapp/introspect"
 
     private val log = LoggerFactory.getLogger(OpenIdConnectFilter::class.java)
 
@@ -36,9 +36,13 @@ class OpenIdConnectFilter : Filter {
         val httpResponse = response as HttpServletResponse
         log.info("Received ${request.method} request for ${request.requestURI}")
 
-        if(request.requestURL.toString().contains("/v2/api-docs") || request.requestURL.toString().contains("api/docs") || ! checkIfProtectedResource(httpRequest) || httpRequest.method == "OPTIONS" ){
+        if(
+                request.requestURL.toString().contains("/v2/api-docs") ||
+                request.requestURL.toString().contains("api/docs") ||
+                !checkIfProtectedResource(httpRequest) ||
+                httpRequest.method == "OPTIONS"
+        )
             return chain.doFilter(request, response)
-        }
 
         val bearerToken = getBearerToken(httpRequest) ?: return throwBadRequestException(httpResponse)
         val introspectionResponse = getIntrospectionResponse(bearerToken)

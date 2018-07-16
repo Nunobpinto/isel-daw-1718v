@@ -10,10 +10,12 @@ import com.google.code.siren4j.component.Entity
 import com.google.code.siren4j.converter.ReflectingConverter
 import io.swagger.annotations.*
 import isel.leic.daw.checklistsAPI.configuration.security.UserInfo
+import isel.leic.daw.checklistsAPI.exceptions.NotFoundException
 import isel.leic.daw.checklistsAPI.exceptions.UnauthenticatedException
 import isel.leic.daw.checklistsAPI.mappers.InputMapper
 import isel.leic.daw.checklistsAPI.mappers.OutputMapper
 import isel.leic.daw.checklistsAPI.service.UserService
+import org.aspectj.weaver.ast.Not
 import java.security.Principal
 
 @RestController
@@ -41,48 +43,17 @@ class UserController {
             @ApiParam(value = "The username of the User", required = true)
             @PathVariable username: String
     ): ResponseEntity<Entity> {
-        val user = userService.getUser(username)
+        val user = userService.getUser(username).orElseThrow{ NotFoundException() }
         val output = outputMapper.toUserOutput(user)
         return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
 
     @PostMapping()
-    fun registerUser() = userService.saveUser(User(sub=userInfo.sub!!))
-
-    @ApiOperation(value = "Updates Specific User")
-    @ApiResponses(
-            ApiResponse(code = 200, message = "User updated successfully"),
-            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
-            ApiResponse(code = 404, message = "User Not Found")
-    )
-    @PutMapping("/{username}")
-    fun updateUser(
-            @ApiParam(value = "The username of the User to be updated")
-            @PathVariable username: String,
-            @ApiParam(value = "Input that represents the User to be updated")
-            @RequestBody input: UserInputModel,
-            principal: Principal
-    ): User {
-        val currentUser = userService.getUser(input.username)
-        if (currentUser.sub != principal.name) throw UnauthenticatedException("Forbidden")
-        val user = inputMapper.toUser(input, currentUser.checklists, currentUser.checklistTemplates)
-        return userService.saveUser(user)
+    fun registerUser(): ResponseEntity<Entity> {
+        val user = userService.getUser(userInfo.sub!!).orElseGet {
+            userService.saveUser(User(sub=userInfo.sub!!))
+        }
+        val output = outputMapper.toUserOutput(user)
+        return ResponseEntity.ok(ReflectingConverter.newInstance().toEntity(output))
     }
-
-    @ApiOperation(value = "Deletes Specific User")
-    @ApiResponses(
-            ApiResponse(code = 200, message = "User deleted successfully"),
-            ApiResponse(code = 400, message = "Bad Request - Parameters may not be correct"),
-            ApiResponse(code = 404, message = "User Not Found")
-    )
-    @DeleteMapping("/{username}")
-    fun deleteUser(
-            @ApiParam(value = "The username of the User to be deleted")
-            @PathVariable username: String,
-            principal: Principal
-    ) {
-        if (username != principal.name) throw UnauthenticatedException("Forbidden")
-        return userService.deleteUser(username)
-    }
-
 }
